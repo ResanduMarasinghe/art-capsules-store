@@ -1,0 +1,110 @@
+[
+  {
+    "id": "fv-01",
+    "title": "Neon Mirage Capsule",
+    "artist": "Studio Vist",
+    "price": 13.49,
+    "description": "Holographic gradients collide with vaporwave silhouettes to form a lucid AI mirage.",
+    "image": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ai-art", "retro", "aesthetic"]
+  },
+  {
+    "id": "fv-02",
+    "title": "Lumen Drift Capsule",
+    "artist": "Frame Vist Atelier",
+    "price": 11.99,
+    "description": "Soft ribbons of light weave through abstract frames with a cosmic hush.",
+    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ai-art", "abstract", "aesthetic"]
+  },
+  {
+    "id": "fv-03",
+    "title": "Velvet Lattice Capsule",
+    "artist": "Noir Habitat",
+    "price": 12.29,
+    "description": "Matte indigo panels reveal glitch-threaded geometry suspended in calm shadow.",
+    "image": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ai-art", "glitch", "abstract"]
+  },
+  {
+    "id": "fv-04",
+    "title": "Holographic Echo Capsule",
+    "artist": "Aiko Ren",
+    "price": 9.79,
+    "description": "Echoing arcs of chrome shimmer like retro-futurist sound waves.",
+    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+    "tags": ["retro", "glitch", "aesthetic"]
+  },
+  {
+    "id": "fv-05",
+    "title": "Solar Bloom Capsule",
+    "artist": "Sol Frame",
+    "price": 8.99,
+    "description": "Petaled sunbursts unfold like cosmic flora rendered through neural dye.",
+    "image": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ai-art", "cosmic", "aesthetic"]
+  },
+  {
+    "id": "fv-06",
+    "title": "Prism Noir Capsule",
+    "artist": "Isla Vist",
+    "price": 10.49,
+    "description": "Charcoal gradients fracture light into prismatic flare lines.",
+    "image": "https://images.unsplash.com/photo-1526483360412-f4dbaf036963?auto=format&fit=crop&w=900&q=80",
+    "tags": ["abstract", "cosmic", "aesthetic"]
+  },
+  {
+    "id": "fv-07",
+    "title": "Stardust Glyph Capsule",
+    "artist": "Kara Lune",
+    "price": 14.49,
+    "description": "Glyphic marks float across iridescent dust fields with cosmic pacing.",
+    "image": "https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cosmic", "abstract", "ai-art"]
+  },
+  {
+    "id": "fv-08",
+    "title": "Coral Glitch Capsule",
+    "artist": "Atelier V",
+    "price": 7.99,
+    "description": "Digital coral reefs pixelate into glitch harmonies and pastel noise.",
+    "image": "https://images.unsplash.com/photo-1444047427283-88a67f631b3d?auto=format&fit=crop&w=900&q=80",
+    "tags": ["glitch", "aesthetic", "ai-art"]
+  },
+  {
+    "id": "fv-09",
+    "title": "Midnight Reverberation Capsule",
+    "artist": "Noctis Array",
+    "price": 12.99,
+    "description": "Magnetic waves pulse through obsidian gradients like retro synth echoes.",
+    "image": "https://images.unsplash.com/photo-1500534314216-66d0d71a5e32?auto=format&fit=crop&w=900&q=80",
+    "tags": ["retro", "cosmic", "abstract"]
+  },
+  {
+    "id": "fv-10",
+    "title": "Plasma Loom Capsule",
+    "artist": "Lio Mercer",
+    "price": 9.39,
+    "description": "Threads of plasma weave neon cloths that shimmer with glitch seams.",
+    "image": "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=900&q=80",
+    "tags": ["glitch", "abstract", "ai-art"]
+  },
+  {
+    "id": "fv-11",
+    "title": "Nova Montage Capsule",
+    "artist": "Celeste Wren",
+    "price": 14.99,
+    "description": "Collaged starfields cascade into cinematic strips of color and haze.",
+    "image": "https://images.unsplash.com/photo-1470104240373-bc1812eddc9f?auto=format&fit=crop&w=900&q=80",
+    "tags": ["cosmic", "retro", "aesthetic"]
+  },
+  {
+    "id": "fv-12",
+    "title": "Vapor Bloom Capsule",
+    "artist": "Ivy Tidal",
+    "price": 10.89,
+    "description": "Suspended mist forms volumetric petals with AI-sculpted lighting.",
+    "image": "https://images.unsplash.com/photo-1500534314602-6de4d3c4396a?auto=format&fit=crop&w=900&q=80",
+    "tags": ["ai-art", "aesthetic", "abstract"]
+  }
+]
