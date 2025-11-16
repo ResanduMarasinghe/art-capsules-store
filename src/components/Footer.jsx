@@ -58,7 +58,7 @@ const Footer = () => (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between">
       <div>
         <p className="font-display text-lg tracking-[0.35em] text-gray-900">Frame Vist</p>
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-slate-500 whitespace-nowrap">
           © {new Date().getFullYear()} Frame Vist Studio · Future-forward AI capsules.
         </p>
       </div>
