@@ -7,22 +7,29 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-8" aria-modal="true" role="dialog">
+    <div
+      className="fixed inset-0 z-[100] flex items-stretch justify-center px-0 sm:items-center sm:px-8"
+      aria-modal="true"
+      role="dialog"
+    >
       <div
         className="animate-backdrop absolute inset-0 bg-ink/60 backdrop-blur-[18px]"
         onClick={onClose}
       />
-      <div className="animate-modal-enter glass-panel relative w-full max-w-5xl overflow-hidden rounded-[40px] border border-white/40 bg-white/95 shadow-[0_30px_120px_rgba(15,23,42,0.25)]">
+      <div
+        className="animate-modal-enter glass-panel relative flex h-full w-full max-w-none flex-col overflow-hidden rounded-none border border-white/30 bg-white/98 shadow-none sm:h-auto sm:max-h-[90vh] sm:max-w-5xl sm:rounded-[40px] sm:border-white/40 sm:shadow-[0_30px_120px_rgba(15,23,42,0.25)]"
+      >
         <button
           type="button"
           aria-label="Close capsule view"
-          className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full border border-transparent bg-white/70 text-slate-500 shadow-sm transition hover:border-ink/30 hover:text-ink"
+          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-ink/80 text-white shadow-lg shadow-ink/30 backdrop-blur-sm transition hover:bg-ink sm:right-6 sm:top-6"
           onClick={onClose}
         >
           <FaXmark className="h-4 w-4" />
         </button>
-        <div className="grid gap-8 p-8 md:grid-cols-[1.1fr,0.9fr]">
-          <figure className="relative overflow-hidden rounded-[32px] bg-slate-100 shadow-inner">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white via-white/80 to-transparent sm:hidden" />
+        <div className="flex h-full flex-col gap-6 overflow-y-auto p-6 sm:gap-8 sm:p-8 md:grid md:grid-cols-[1.1fr,0.9fr]">
+          <figure className="relative w-full overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]">
             <img
               src={product.image}
               alt={product.title}

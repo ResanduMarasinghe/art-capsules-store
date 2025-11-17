@@ -23,24 +23,26 @@ const Home = ({ searchQuery, onSearchChange, activeTag, onTagChange, tags }) => 
     <>
       <section
         id="hero"
-        className="relative isolate overflow-hidden bg-white px-6 py-24 text-center md:py-32"
+        className="relative isolate overflow-hidden bg-white px-4 py-20 text-center sm:px-6 md:py-32"
       >
         <div
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(0,0,0,0.08),_transparent_55%)] opacity-40"
           aria-hidden="true"
         />
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center animate-hero-fade-in">
-          <p className="text-xs uppercase tracking-[0.45em] text-slate-400">Frame Vist</p>
-          <h1 className="font-display text-4xl leading-tight text-ink sm:text-6xl">
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5 text-center sm:gap-6 lg:gap-8 animate-hero-fade-in">
+          <p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-400 sm:text-xs">
+            Frame Vist
+          </p>
+          <h1 className="font-display text-3xl leading-tight text-ink sm:text-5xl lg:text-6xl">
             Where Imagination Meets Vision.
           </h1>
-          <p className="text-base text-slate-500 sm:text-lg">
+          <p className="text-sm leading-relaxed text-slate-500 sm:text-base">
             Frame Vist is a curated space of digital artistry, crafted, refined, and delivered as immersive art capsules.
             Every piece is a moment, a mood, a visual experience waiting to be explored.
           </p>
           <a
             href="#catalogue"
-            className="inline-flex items-center rounded-full border border-ink bg-ink px-8 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-transparent hover:text-ink"
+            className="mx-auto inline-flex items-center rounded-full border border-ink bg-ink px-8 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-transparent hover:text-ink sm:text-sm"
           >
             Explore Capsules
           </a>
@@ -74,7 +76,7 @@ const Home = ({ searchQuery, onSearchChange, activeTag, onTagChange, tags }) => 
               />
             </div>
             <div
-              className="absolute -right-6 top-10 h-16 w-16 overflow-hidden rounded-full border border-slate-200/80"
+              className="absolute -right-6 top-10 hidden h-16 w-16 overflow-hidden rounded-full border border-slate-200/80 md:block"
             >
               <img
                 src="/images/about-visual.jpg"
@@ -128,7 +130,7 @@ const Home = ({ searchQuery, onSearchChange, activeTag, onTagChange, tags }) => 
 
         <section>
           {filteredProducts.length ? (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
               ))}
