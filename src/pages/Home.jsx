@@ -1,14 +1,53 @@
 import { useMemo } from 'react';
-import products from '../data/products.json';
 import ProductCard from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 
-const Home = ({ searchQuery, onSearchChange, activeTag, onTagChange, tags }) => {
+const parseAspectRatio = (aspectRatio = '1:1') => {
+  const [rawWidth, rawHeight] = (aspectRatio || '1:1').split(':').map(Number);
+  if (!rawWidth || !rawHeight) return 1;
+  return rawWidth / rawHeight;
+};
+
+const getBentoClasses = (aspectRatio = '1:1', index = 0) => {
+  const ratio = parseAspectRatio(aspectRatio);
+  const classes = ['col-span-1'];
+
+  if (ratio >= 1.9) {
+    classes.push('sm:col-span-2 lg:col-span-3 xl:col-span-4');
+  } else if (ratio >= 1.35) {
+    classes.push('sm:col-span-2 lg:col-span-2');
+  }
+
+  if (ratio <= 0.5) {
+    classes.push('sm:row-span-2 lg:row-span-3');
+  } else if (ratio <= 0.75) {
+    classes.push('sm:row-span-2 lg:row-span-2');
+  }
+
+  if (index % 7 === 0) {
+    classes.push('lg:row-span-2');
+  } else if (index % 5 === 0) {
+    classes.push('lg:col-span-2');
+  }
+
+  return classes.join(' ');
+};
+
+const Home = ({
+  capsules = [],
+  capsulesLoading = false,
+  capsulesError = null,
+  searchQuery,
+  onSearchChange,
+  activeTag,
+  onTagChange,
+  tags = ['all'],
+}) => {
   const { addToCart } = useCart();
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return products.filter((product) => {
+    return capsules.filter((product) => {
       const matchesSearch = query
         ? product.title.toLowerCase().includes(query) ||
           product.description.toLowerCase().includes(query) ||
@@ -17,7 +56,7 @@ const Home = ({ searchQuery, onSearchChange, activeTag, onTagChange, tags }) => 
       const matchesTag = activeTag === 'all' ? true : product.tags?.includes(activeTag);
       return matchesSearch && matchesTag;
     });
-  }, [searchQuery, activeTag]);
+  }, [searchQuery, activeTag, capsules]);
 
   return (
     <>
@@ -111,7 +150,7 @@ const Home = ({ searchQuery, onSearchChange, activeTag, onTagChange, tags }) => 
             </label>
           </div>
           <div className="flex flex-wrap gap-3">
-            {tags.map((tag) => (
+            {tags?.map((tag) => (
               <button
                 key={tag}
                 type="button"
@@ -129,10 +168,21 @@ const Home = ({ searchQuery, onSearchChange, activeTag, onTagChange, tags }) => 
         </section>
 
         <section>
-          {filteredProducts.length ? (
-            <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+          {capsulesLoading ? (
+            <div className="glass-panel rounded-[28px] border border-slate-200/80 p-12 text-center text-slate-500">
+              <p className="text-sm uppercase tracking-[0.35em] text-mist">Loading capsules…</p>
+            </div>
+          ) : capsulesError ? (
+            <div className="glass-panel rounded-[28px] border border-rose-200 bg-rose-50/50 p-12 text-center text-rose-600">
+              <p className="text-sm uppercase tracking-[0.35em]">Error loading capsules</p>
+              <p className="mt-3 text-base">{capsulesError}</p>
+            </div>
+          ) : filteredProducts.length ? (
+            <div className="grid auto-rows-[minmax(240px,_auto)] grid-flow-dense grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 xl:gap-8">
+              {filteredProducts.map((product, index) => (
+                <div key={product.id} className={`${getBentoClasses(product.aspectRatio, index)} h-full`}>
+                  <ProductCard product={product} onAddToCart={addToCart} />
+                </div>
               ))}
             </div>
           ) : (

@@ -1,15 +1,78 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { createOrder } from '../services/orders';
+import { recordCapsulePurchase } from '../services/capsules';
+import { downloadCapsuleBundle } from '../services/downloads';
+import { recordCollectorEmail } from '../services/collectors';
 
 const Checkout = () => {
   const { cartItems, cartSummary, clearCart } = useCart();
   const [orderComplete, setOrderComplete] = useState(false);
+  const [orderId, setOrderId] = useState(null);
+  const [confirmedEmail, setConfirmedEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [formValues, setFormValues] = useState({ fullName: '', email: '' });
 
-  const handleCheckout = (event) => {
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCheckout = async (event) => {
     event.preventDefault();
-    if (!cartItems.length) return;
-    clearCart();
-    setOrderComplete(true);
+    if (!cartItems.length || submitting) {
+      setError('Add capsules to your cart before checking out.');
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    const normalizedItems = cartItems.map((item) => ({
+      ...item,
+      image: item.image || item.mainImage || item.gallery?.[0] || '',
+    }));
+
+    const normalizedEmail = formValues.email.trim();
+
+    const orderPayload = {
+      customerName: formValues.fullName.trim(),
+      customerEmail: normalizedEmail,
+      subtotal: cartSummary.subtotal,
+      taxes: cartSummary.taxes,
+      total: cartSummary.total,
+      items: normalizedItems,
+    };
+
+    try {
+      const newOrderId = await createOrder(orderPayload);
+      await Promise.all(
+        normalizedItems.map((item) => recordCapsulePurchase(item.id, item.quantity))
+      );
+      const orderWithId = { ...orderPayload, id: newOrderId };
+      recordCollectorEmail({
+        email: normalizedEmail,
+        name: orderPayload.customerName,
+        orderId: newOrderId,
+      }).catch((collectorError) => {
+        console.error('Unable to store collector email', collectorError);
+      });
+      try {
+        await downloadCapsuleBundle(orderWithId);
+      } catch (downloadError) {
+        console.error('Unable to generate download zip', downloadError);
+      }
+  clearCart();
+  setConfirmedEmail(normalizedEmail);
+  setFormValues({ fullName: '', email: '' });
+      setOrderId(newOrderId);
+      setOrderComplete(true);
+    } catch (err) {
+      setError(err.message || 'Unable to complete the order. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -25,19 +88,23 @@ const Checkout = () => {
                 Confirmation
               </p>
               <p className="text-2xl font-medium text-ink">
-                Order Complete — Your Capsule is Prepared.
+                Order #{orderId} confirmed — your capsules are secured.
               </p>
               <p className="text-slate-500">
-                A receipt and download certificate has been emailed to you. Feel free to continue curating new capsules anytime.
+                Your download bundle should begin automatically. We also saved {confirmedEmail || 'your email'} so you can stay in the loop on future drops.
               </p>
             </div>
           ) : (
             <form className="mt-6 space-y-5 text-sm" onSubmit={handleCheckout}>
+              {error && <p className="text-sm text-rose-500">{error}</p>}
               <div>
                 <label className="text-mist">Full Name</label>
                 <input
+                  name="fullName"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-ink focus:border-ink focus:outline-none"
                   placeholder="Ava Sullivan"
+                  value={formValues.fullName}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -45,8 +112,11 @@ const Checkout = () => {
                 <label className="text-mist">Email</label>
                 <input
                   type="email"
+                  name="email"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-ink focus:border-ink focus:outline-none"
                   placeholder="ava@framevist.com"
+                  value={formValues.email}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -63,9 +133,9 @@ const Checkout = () => {
               <button
                 type="submit"
                 className="w-full rounded-full bg-ink px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={!cartItems.length}
+                disabled={!cartItems.length || submitting}
               >
-                Complete Order
+                {submitting ? 'Processing…' : 'Complete Order'}
               </button>
               {!cartItems.length && (
                 <p className="text-center text-xs uppercase tracking-[0.4em] text-mist">

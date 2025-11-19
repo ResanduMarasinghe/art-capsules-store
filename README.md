@@ -1,3 +1,49 @@
+# Frame Vist Capsules
+
+This storefront + admin console runs on Firebase (Firestore, Auth, Storage) with real-time catalogue editing, checkout logging, and instant download bundles.
+
+## Environment configuration
+
+Create a `.env` file with the Firebase keys:
+
+```
+REACT_APP_FIREBASE_API_KEY=...
+REACT_APP_FIREBASE_AUTH_DOMAIN=...
+REACT_APP_FIREBASE_PROJECT_ID=...
+REACT_APP_FIREBASE_STORAGE_BUCKET=...
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=...
+REACT_APP_FIREBASE_APP_ID=...
+
+REACT_APP_CLOUDINARY_CLOUD_NAME=...
+REACT_APP_CLOUDINARY_UPLOAD_PRESET=...
+```
+
+The checkout flow automatically formats capsule metadata pulled from Firestore (story, prompt, resolutions, etc.) and packages everything into the download bundle a collector receives immediately after purchase.
+
+## Collector emails
+
+Checkout now collects a required email address for every order. Each submission is saved inside the `collectorEmails` Firestore collection with the customer's name, email, related order ID, and a timestamp. Admins can review the latest entries inside the dashboard to export or contact collectors, while writes remain open to the storefront checkout so purchases can complete without authentication.
+
+## Image uploads
+
+The admin dashboard can upload images directly to Cloudinary (or any compatible unsigned upload endpoint). Provide a Cloudinary **unsigned upload preset** and the **cloud name** via the environment variables above. Uploaded images immediately populate the corresponding URL fields (main image, gallery entries, and variations), so you no longer need to paste external URLs manually.
+
+## Instant downloads
+
+During checkout, the app:
+
+1. Writes an order record to Firestore (with customer info and purchased items).
+2. Increments each capsule's `stats.purchases` value for analytics.
+3. Generates a `.zip` archive on the client using JSZip, containing:
+   - `metadata.json` for every capsule (title, story, prompt, etc.).
+   - Primary artwork plus gallery/variation images.
+   - Each resolution URL attached in the admin form.
+4. Saves the archive to the collector's device with the pattern `frame-vist-order-<id>.zip`.
+
+Because the download happens inside the browser, make sure the capsule asset URLs (gallery, variations, resolutions) are publicly accessible and properly CORS-enabled.
+
+# Getting Started with Create React App
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -3,6 +3,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 const CartContext = createContext(null);
 const CART_STORAGE_KEY = 'frame-vist-cart-v1';
 
+const getCoverImage = (product) =>
+  product?.mainImage || product?.image || product?.gallery?.[0] || product?.variations?.[0] || '';
+
 const getInitialCartItems = () => {
   if (typeof window === 'undefined') {
     return [];
@@ -49,7 +52,8 @@ export const CartProvider = ({ children }) => {
             : entry
         );
       }
-      return [...prev, { ...product, quantity }];
+      const image = getCoverImage(product);
+      return [...prev, { ...product, image, quantity }];
     });
   }, []);
 

@@ -77,7 +77,7 @@ const CartDrawer = ({ open, onClose, onCheckout }) => {
                       className="flex gap-4 rounded-[28px] border border-slate-100 bg-white/90 p-4 shadow-sm"
                     >
                       <img
-                        src={item.image}
+                        src={item.image || item.mainImage || item.gallery?.[0] || ''}
                         alt={item.title}
                         className="h-24 w-24 flex-shrink-0 rounded-2xl object-cover"
                       />

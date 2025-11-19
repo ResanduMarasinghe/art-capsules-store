@@ -6,10 +6,15 @@ const ProductCard = ({ product, onAddToCart }) => {
   const openModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
 
+  const coverImage =
+    product.mainImage || product.image || product.gallery?.[0] || product.variations?.[0] || '';
+  const aspectRatioValue = product.aspectRatioValue || '1 / 1';
+
   return (
-    <article className="group glass-panel relative flex flex-col overflow-hidden rounded-[28px] border border-white/30 bg-white/70 shadow-frame transition duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-ink/10">
+    <article className="group glass-panel relative flex h-full flex-col overflow-hidden rounded-[28px] border border-white/30 bg-white/70 shadow-frame transition duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-ink/10">
       <div
-        className="relative aspect-[4/5] w-full cursor-pointer overflow-hidden"
+        className="relative w-full cursor-pointer overflow-hidden bg-slate-100"
+        style={{ aspectRatio: aspectRatioValue }}
         onClick={openModal}
         role="button"
         tabIndex={0}
@@ -23,9 +28,9 @@ const ProductCard = ({ product, onAddToCart }) => {
         aria-label={`View ${product.title}`}
       >
         <img
-          src={product.image}
+          src={coverImage}
           alt={product.title}
-          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          className="absolute inset-0 h-full w-full object-contain transition duration-500 group-hover:scale-105"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent opacity-0 transition group-hover:opacity-100" />
@@ -55,7 +60,7 @@ const ProductCard = ({ product, onAddToCart }) => {
           product={product}
           onClose={closeModal}
           onAddToCart={() => {
-            onAddToCart(product);
+            onAddToCart({ ...product, image: coverImage });
             closeModal();
           }}
         />
