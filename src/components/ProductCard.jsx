@@ -30,7 +30,7 @@ const ProductCard = ({ product, onAddToCart }) => {
         <img
           src={coverImage}
           alt={product.title}
-          className="absolute inset-0 h-full w-full object-contain transition duration-500 group-hover:scale-105"
+          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent opacity-0 transition group-hover:opacity-100" />

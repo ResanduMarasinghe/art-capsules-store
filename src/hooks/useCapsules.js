@@ -20,14 +20,16 @@ export const useCapsules = () => {
     const load = async () => {
       try {
         const snapshot = await getDocs(capsulesRef);
-        const docs = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            ...data,
-            aspectRatioValue: getAspectRatioValue(data.aspectRatio),
-          };
-        });
+        const docs = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              aspectRatioValue: getAspectRatioValue(data.aspectRatio),
+            };
+          })
+          .filter((capsule) => capsule.published !== false);
         setCapsules(docs);
       } catch (err) {
         setError(err.message);

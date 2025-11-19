@@ -1,12 +1,68 @@
 # Frame Vist Capsules
 
-This storefront + admin console runs on Firebase (Firestore, Auth, Storage) with real-time catalogue editing, checkout logging, and instant download bundles.
+> A Firestore-powered digital art storefront with a fully featured admin console, instant-download checkout, and Cloudinary-backed creative pipeline.
+
+- **Storefront** – responsive, bento-style capsule grid with search, tagging, cart, and immersive modals.
+- **Checkout** – validates collector details, logs orders to Firestore, increments capsule analytics, and ships a curated ZIP instantly via JSZip + FileSaver.
+- **Admin console** – gated by Firebase Auth with capsule CRUD, analytics, sequential ID generation, Cloudinary uploads, and collector email visibility.
+
+This document captures every major capability, plus setup, data models, and troubleshooting guidance so you can run, extend, or audit the platform end-to-end.
+
+## Feature matrix
+
+### Storefront experience
+
+| Capability             | Description                                                                                                         | Source of truth                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Bento capsule grid     | Responsive CSS grid that uses Firestore-provided `aspectRatio` metadata to auto-span cards and reduce whitespace    | `src/pages/Home.jsx`, `src/components/ProductCard.jsx`         |
+| Search & tag filtering | Client-side filtering across title, artist, descriptions, and tagged moods                                          | `Home.jsx`                                                     |
+| Capsule modal          | Full metadata (story, prompt, resolutions, gallery) with add-to-cart CTA                                            | `src/components/ProductModal.jsx`                              |
+| Cart drawer            | Global cart context with persistent state per session                                                               | `src/context/CartContext.jsx`, `src/components/CartDrawer.jsx` |
+| Publish controls       | Unpublished capsules (`published === false`) are filtered client-side to ensure work-in-progress pieces stay hidden | `src/hooks/useCapsules.js`                                     |
+
+### Checkout & fulfillment
+
+| Capability             | Description                                                                                           | Implementation                                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Collector verification | Requires name + email and captures per-order notes                                                    | `src/pages/Checkout.jsx`                                |
+| Firestore orders       | Persists `orders` documents with line items, totals, fulfillment status, and server timestamps        | `src/services/orders.js`                                |
+| Collector mailing list | Mirrors every checkout email inside `collectorEmails` collection for admin outreach                   | `src/services/collectors.js`                            |
+| Instant downloads      | Uses JSZip + FileSaver to build `frame-vist-order-<id>.zip` containing art assets and `metadata.json` | `src/services/downloads.js`                             |
+| Analytics counters     | Each purchase increments capsule `stats.purchases` and global metadata totals                         | `src/services/capsules.js`, `src/services/analytics.js` |
+
+### Admin console
+
+| Capability             | Description                                                                                                                    | Files                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Firebase Auth gate     | Email/password login with loading states and friendly errors                                                                   | `src/admin/routes/RequireAdmin.jsx`, `src/admin/pages/AdminSignIn.jsx`, `src/context/AuthContext.jsx` |
+| Capsule CRUD           | Form-driven create/update with validation, gallery inputs, tag management, resolution helpers, and auto aspect ratio detection | `src/admin/pages/CapsuleForm.jsx`, `src/admin/components/*`                                           |
+| Cloudinary uploads     | Unsigned uploads per field (main image, gallery slots, variations) that immediately populate Firestore payloads                | `src/admin/components/ImageUploadButton.jsx`, `GalleryInput.jsx`                                      |
+| Sequential capsule IDs | Transactions against `metadata/capsulesCounter` ensure predictable IDs like `cap_0007`                                         | `src/services/capsules.js`                                                                            |
+| Published toggle       | Quickly hide/show capsules; storefront respects the flag                                                                       | `CapsuleForm.jsx`, `capsules.js`                                                                      |
+| Analytics & collectors | Dashboard cards show views/carts/purchases, while collector table surfaces the latest emails                                   | `src/admin/pages/AdminDashboard.jsx`, `Analytics.jsx`                                                 |
+
+### Data & infrastructure
+
+| Area             | Details                                                                                                                                                                            |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Firebase         | Firestore for data, Auth for admin logins. Storage is optional—the project relies on Cloudinary for media but Firestore Storage rules remain in place for backwards compatibility. |
+| Cloudinary       | Unsigned preset accepts uploads directly from the admin UI; responses populate image URLs stored in Firestore.                                                                     |
+| Tailwind CSS     | Utility-first styling across storefront and admin, configured via `tailwind.config.js` + `postcss.config.js`.                                                                      |
+| React Router DOM | Powers public vs admin routing, including guards and nested layouts.                                                                                                               |
+
+## Architecture overview
+
+1. **Data ingestion** – Admins create capsules via the console. Each document includes metadata (title, artist, story, prompt, gallery URLs, variations, resolutions array, aspect ratio, stats, and `published` flag).
+2. **Catalogue fetch** – `useCapsules` loads the `capsules` collection, converts `aspectRatio` strings to CSS values, and filters out unpublished rows before exposing them to `Home`.
+3. **Storefront UX** – Visitors browse the bento grid, open modals, and add items to the cart stored in context.
+4. **Checkout** – Collectors provide contact info; the order service writes to Firestore, collector email is replicated, capsule stats increment, and the download service assembles the ZIP.
+5. **Admin oversight** – Authenticated admins access dashboards, edit capsules, view collector emails, and upload new media through Cloudinary.
 
 ## Environment configuration
 
-Create a `.env` file with the Firebase keys:
+Create a `.env` or `.env.local` file with the following variables (React requires the `REACT_APP_` prefix):
 
-```
+```bash
 REACT_APP_FIREBASE_API_KEY=...
 REACT_APP_FIREBASE_AUTH_DOMAIN=...
 REACT_APP_FIREBASE_PROJECT_ID=...
@@ -18,99 +74,157 @@ REACT_APP_CLOUDINARY_CLOUD_NAME=...
 REACT_APP_CLOUDINARY_UPLOAD_PRESET=...
 ```
 
-The checkout flow automatically formats capsule metadata pulled from Firestore (story, prompt, resolutions, etc.) and packages everything into the download bundle a collector receives immediately after purchase.
+**Firebase tips**
 
-## Collector emails
+- Enable Email/Password inside Firebase Auth to unlock the admin console.
+- Create the following Firestore collections: `capsules`, `orders`, `collectorEmails`, `metadata` (with `capsulesCounter` doc), plus any analytics docs referenced by the dashboard.
+- Update `firestore.rules` to match your deployment (public read on `capsules`, admin-only writes, etc.).
 
-Checkout now collects a required email address for every order. Each submission is saved inside the `collectorEmails` Firestore collection with the customer's name, email, related order ID, and a timestamp. Admins can review the latest entries inside the dashboard to export or contact collectors, while writes remain open to the storefront checkout so purchases can complete without authentication.
+**Cloudinary tips**
 
-## Image uploads
+- Create an **unsigned upload preset** with the desired folder/transformations.
+- Whitelist your domain inside the preset’s CORS settings.
+- Store the `cloud_name` and `upload_preset` in the env vars above.
 
-The admin dashboard can upload images directly to Cloudinary (or any compatible unsigned upload endpoint). Provide a Cloudinary **unsigned upload preset** and the **cloud name** via the environment variables above. Uploaded images immediately populate the corresponding URL fields (main image, gallery entries, and variations), so you no longer need to paste external URLs manually.
+## Project structure
 
-## Instant downloads
+```
+src/
+├── admin/              # Admin-only layouts, components, and pages
+├── components/         # Storefront UI (header, footer, cart, products)
+├── context/            # Auth + Cart providers
+├── hooks/              # Custom hooks (capsules, etc.)
+├── pages/              # Storefront routes (Home, Checkout)
+└── services/           # Firestore, Cloudinary, downloads, analytics helpers
+```
 
-During checkout, the app:
+Tailwind + PostCSS config live at the repo root. Firebase hosting rules and indexes live beside `firebase.json`.
 
-1. Writes an order record to Firestore (with customer info and purchased items).
-2. Increments each capsule's `stats.purchases` value for analytics.
-3. Generates a `.zip` archive on the client using JSZip, containing:
-   - `metadata.json` for every capsule (title, story, prompt, etc.).
-   - Primary artwork plus gallery/variation images.
-   - Each resolution URL attached in the admin form.
-4. Saves the archive to the collector's device with the pattern `frame-vist-order-<id>.zip`.
+## Storefront UX details
 
-Because the download happens inside the browser, make sure the capsule asset URLs (gallery, variations, resolutions) are publicly accessible and properly CORS-enabled.
+- **Hero & about sections** introduce the brand with subtle gradients and accessible typography.
+- **Catalogue controls** include search, tag pills, and keyboard-accessible buttons.
+- **Bento grid** auto-spans cards based on aspect ratios and index positions, delivering a magazine-style layout across breakpoints.
+- **Product cards** use `object-cover` + inline `aspect-ratio` for consistent framing, with hover gradients and modal triggers.
+- **Product modal** surfaces long-form metadata (story, prompt, resolutions, gallery), add-to-cart, and quick stats.
+- **Cart drawer** highlights selected capsules, quantities, subtotals, and checkout CTA.
 
-# Getting Started with Create React App
+## Checkout flow
 
-# Getting Started with Create React App
+1. **Cart validation** – Ensures at least one capsule, calculates totals, and prompts for collector name/email.
+2. **Email capture** – Writes to `collectorEmails` with `orderId`, `capsuleIds`, email, and timestamp for future marketing.
+3. **Order record** – `orders` documents store buyer info, payment summary (client-side), and statuses for potential reconciliation.
+4. **Stats + metadata** – Increments `stats.purchases` on each capsule and optional aggregate counters.
+5. **ZIP creation** – JSZip assembles metadata, gallery, variation, and resolution assets per capsule, then FileSaver downloads `frame-vist-order-<id>.zip` locally.
+6. **Instant confirmation** – Confirmation modal details what was purchased and where the download lives.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Admin console
 
-## Available Scripts
+- **Auth wall** – `RequireAdmin` waits on Firebase Auth; unauthenticated users see the polished `AdminSignIn` page.
+- **Dashboard** – Top-line stats (views, carts, purchases), latest orders, and collector email feed for quick outreach.
+- **Capsules list** – Sortable table with edit/delete/publish toggles and quick filters.
+- **Capsule form** – Multi-section layout with:
+  - Core metadata (title, slug/id, artist, price, story, prompt)
+  - Tags and moods (with type-ahead + pill removal)
+  - Gallery + variations arrays (each slot can upload via Cloudinary or accept direct URLs)
+  - Resolutions array for downloadable assets
+  - Aspect-ratio auto-detection (reads uploaded image dimensions via the `Image` API)
+  - Publish switch and stats seeding
+- **Analytics** – Historical trends, top-performing capsules, and aggregated collector insights (where available in Firestore).
 
-In the project directory, you can run:
+## Cloudinary uploads
 
-### `npm start`
+1. Click an upload button inside the Capsule form.
+2. Component hits Cloudinary unsigned endpoint with the preset & cloud name from env vars.
+3. Successful responses return `secure_url`, automatically inserted into the matching field (main image, gallery slot, variation).
+4. Errors bubble to the UI with retry guidance.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Because uploads are unsigned, keep the preset locked down to the specific folder/transformations and block dangerous formats on the Cloudinary side.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Firestore collections & documents
 
-### `npm test`
+| Collection                 | Schema highlights                                                                                                                                                                              | Notes                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `capsules`                 | `{ id, title, artist, description, story, prompt, price, aspectRatio, aspectRatioValue, tags[], gallery[], variations[], resolutions[], stats: { views, addedToCart, purchases }, published }` | Sequential IDs: `cap_0001`, etc. `published` defaults to `false` until toggled. |
+| `orders`                   | `{ id, items[], subtotal, taxes?, total, collector: { name, email }, status, createdAt, downloadIssuedAt }`                                                                                    | Use server timestamps for ordering in the dashboard.                            |
+| `collectorEmails`          | `{ id, email, name, orderId, capsuleIds[], createdAt }`                                                                                                                                        | Public writes (from checkout) but admin-only reads per Firestore rules.         |
+| `metadata/capsulesCounter` | `{ nextValue, updatedAt }`                                                                                                                                                                     | Transactional counter for sequential IDs.                                       |
+| `analytics/*` (optional)   | Custom docs for dashboard aggregates.                                                                                                                                                          |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Update `firestore.rules` to enforce:
 
-### `npm run build`
+- Public read-only access to `capsules` where `published == true`.
+- Authenticated admin read/write elsewhere.
+- Limited checkout write access to `orders` + `collectorEmails`.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Security considerations
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Auth-only admin** – The admin bundle is part of the React app, but protected at runtime by Firebase Auth + Firestore rules. Never expose admin credentials.
+- **Unsigned uploads** – Treat Cloudinary preset like a credential; restrict allowed domains and formats.
+- **Downloads** – Since assets are fetched client-side for ZIP packaging, ensure asset URLs are public and CORS-enabled.
+- **Environment files** – Do not commit `.env*` files. CRA automatically injects vars prefixed with `REACT_APP_`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Development workflow
 
-### `npm run eject`
+### Prerequisites
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Node 18+ (ideally LTS)
+- npm 9+
+- Firebase project + Cloudinary account
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Install dependencies
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+npm install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Run locally
 
-## Learn More
+```bash
+npm start
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Visit [http://localhost:3000](http://localhost:3000) for the storefront, and append `/admin` for the console once authenticated.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Execute tests
 
-### Code Splitting
+```bash
+npm test
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+The suite currently relies on `react-scripts test` with Testing Library utilities for component-level coverage.
 
-### Analyzing the Bundle Size
+### Build for production
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+npm run build
+```
 
-### Making a Progressive Web App
+Outputs hashed assets inside `build/`, ready for Firebase Hosting or any static host. Remember to set the appropriate rewrite rules in `firebase.json` for SPA routing.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Deployment notes
 
-### Advanced Configuration
+1. Run `npm run build`.
+2. Use `firebase deploy --only hosting` (or your preferred provider) to upload the `build/` directory.
+3. Set environment vars inside your hosting CI or `.env.production` prior to the build.
+4. Sync Firestore rules and indexes (`firebase deploy --only firestore:rules,firestore:indexes`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Troubleshooting
 
-### Deployment
+| Issue                           | Fix                                                                                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cloudinary “Unknown API key”    | Ensure env vars do **not** include angle brackets or quotes. Values must match the unsigned preset + cloud name exactly.                       |
+| Capsule missing from storefront | Confirm `published` is `true` and the document includes valid image URLs + aspect ratio. The hook filters anything with `published === false`. |
+| ZIP download broken             | Check browser console for failed asset fetches. All gallery/variation/resolution URLs must be publicly accessible with correct CORS headers.   |
+| Admin route loops               | Verify Firebase Auth email is registered and allowed. Inspect `firestore.rules` for permission mismatches.                                     |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Appendix: Create React App scripts
 
-### `npm run build` fails to minify
+This project was bootstrapped with [Create React App](https://create-react-app.dev/). Standard scripts remain available:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `npm start` – Start development server with hot reloading.
+- `npm test` – Run Jest in watch mode.
+- `npm run build` – Produce optimized production bundle.
+- `npm run eject` – Copy CRA configs locally (irreversible; use only if you need custom tooling).
+
+Refer to the [CRA documentation](https://create-react-app.dev/docs/getting-started/) for deeper customization guidance.
