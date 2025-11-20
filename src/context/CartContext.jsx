@@ -4,7 +4,7 @@ const CartContext = createContext(null);
 const CART_STORAGE_KEY = 'frame-vist-cart-v1';
 
 const getCoverImage = (product) =>
-  product?.mainImage || product?.image || product?.gallery?.[0] || product?.variations?.[0] || '';
+  product?.mainImage || product?.image || product?.variations?.[0] || '';
 
 const getInitialCartItems = () => {
   if (typeof window === 'undefined') {

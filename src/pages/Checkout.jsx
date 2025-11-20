@@ -31,7 +31,7 @@ const Checkout = () => {
 
     const normalizedItems = cartItems.map((item) => ({
       ...item,
-      image: item.image || item.mainImage || item.gallery?.[0] || '',
+      image: item.image || item.mainImage || item.variations?.[0] || '',
     }));
 
     const normalizedEmail = formValues.email.trim();

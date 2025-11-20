@@ -22,7 +22,7 @@ const Cart = () => {
           >
             <div className="flex flex-1 items-center gap-4">
               <img
-                src={item.image || item.mainImage || item.gallery?.[0] || ''}
+                src={item.image || item.mainImage || item.variations?.[0] || ''}
                 alt={item.title}
                 className="h-20 w-20 rounded-2xl object-cover"
               />

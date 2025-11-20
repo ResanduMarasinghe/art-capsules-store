@@ -1,13 +1,56 @@
 import { useEffect, useMemo, useState } from 'react';
+import { FaCheck, FaPause } from 'react-icons/fa6';
 import { useNavigate, useParams } from 'react-router-dom';
-import GalleryInput from '../components/GalleryInput';
 import TagInput from '../components/TagInput';
 import ColorPicker from '../components/ColorPicker';
 import ResolutionsInput from '../components/ResolutionsInput';
-import { createCapsule, fetchCapsuleById, updateCapsule } from '../../services/capsules';
+import VariationsInput from '../components/VariationsInput';
+import {
+  createCapsule,
+  fetchCapsuleById,
+  fetchCapsules,
+  updateCapsule,
+} from '../../services/capsules';
 import ImageUploadButton from '../components/ImageUploadButton';
 
 const defaultStats = { views: 0, addedToCart: 0, purchases: 0 };
+
+const ASPECT_RATIO_OPTIONS = [
+  '1:1',
+  '4:3',
+  '5:4',
+  '3:4',
+  '4:5',
+  '3:2',
+  '2:3',
+  '16:9',
+  '9:16',
+  '2:1',
+  '1:2',
+];
+
+const STANDARD_RATIOS = ASPECT_RATIO_OPTIONS.map((ratio) => {
+  const [w, h] = ratio.split(':').map(Number);
+  return { label: ratio, value: w / h };
+});
+
+const ASPECT_STATUS_COPY = {
+  idle: '',
+  pending: 'Awaiting image…',
+  detecting: 'Detecting…',
+  success: 'Auto-detected',
+  error: 'Unable to detect',
+  manual: 'Manual override',
+};
+
+const RESOLUTION_STATUS_COPY = {
+  idle: '',
+  pending: 'Awaiting image…',
+  detecting: 'Detecting…',
+  success: 'Auto-detected',
+  error: 'Unable to detect',
+  manual: 'Manual override',
+};
 
 const gcd = (a, b) => {
   if (!b) return a;
@@ -24,7 +67,37 @@ const formatAspectRatioFromDimensions = (width, height) => {
   return `${normalizedWidth}:${normalizedHeight}`;
 };
 
+const evaluateAspectConfidence = (width, height) => {
+  if (!width || !height) return null;
+  const ratioValue = width / height;
+  let bestMatch = { label: null, diff: Number.POSITIVE_INFINITY };
+  STANDARD_RATIOS.forEach((candidate) => {
+    const diff = Math.abs(candidate.value - ratioValue);
+    if (diff < bestMatch.diff) {
+      bestMatch = { label: candidate.label, diff };
+    }
+  });
+  const diff = bestMatch.diff;
+  let level = 'approximate';
+  if (diff <= 0.01) {
+    level = 'excellent';
+  } else if (diff <= 0.03) {
+    level = 'good';
+  }
+  return {
+    level,
+    match: bestMatch.label,
+    ratioValue: Number(ratioValue.toFixed(3)),
+    diff: Number(diff.toFixed(3)),
+  };
+};
+
 const isLikelyUrl = (value) => /^https?:\/\//i.test(value?.trim() || '');
+
+const computeDetectionStatus = (value) => {
+  if (!value?.trim()) return 'idle';
+  return isLikelyUrl(value) ? 'detecting' : 'pending';
+};
 
 const withCacheBuster = (url) => {
   if (!url) return '';
@@ -32,15 +105,24 @@ const withCacheBuster = (url) => {
   return `${url}${separator}aspect=${Date.now()}`;
 };
 
+const guessFileTypeFromUrl = (url = '') => {
+  if (!url) return '';
+  const match = url.match(/\.([a-zA-Z0-9]{2,5})(?:\?|$)/);
+  if (!match) return '';
+  const ext = match[1].toUpperCase();
+  if (ext === 'JPEG') return 'JPG';
+  if (ext === 'WEBP') return 'WEBP';
+  if (ext === 'PNG') return 'PNG';
+  if (ext === 'JPG' || ext === 'HEIC' || ext === 'TIFF') return ext;
+  return ext.slice(0, 4);
+};
+
 const baseState = {
   title: '',
   price: '',
   mainImage: '',
-  gallery: [''],
   description: '',
-  story: '',
   tags: [],
-  mood: '',
   colorPalette: [],
   aspectRatio: '',
   resolutions: [{ label: '', url: '' }],
@@ -52,6 +134,15 @@ const baseState = {
   stats: defaultStats,
 };
 
+const RequiredMark = () => (
+  <span className="ml-1 inline-flex items-center">
+    <span className="text-base font-semibold leading-none text-rose-500" aria-hidden="true">
+      *
+    </span>
+    <span className="sr-only">required</span>
+  </span>
+);
+
 const CapsuleForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -62,22 +153,28 @@ const CapsuleForm = () => {
   const [error, setError] = useState(null);
   const [aspectManuallySet, setAspectManuallySet] = useState(false);
   const [aspectStatus, setAspectStatus] = useState('idle');
+  const [aspectConfidence, setAspectConfidence] = useState(null);
+  const [resolutionStatus, setResolutionStatus] = useState('idle');
+  const [resolutionManuallySet, setResolutionManuallySet] = useState(false);
+  const [detectedResolution, setDetectedResolution] = useState('');
+  const [fileTypeManuallySet, setFileTypeManuallySet] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]);
 
   useEffect(() => {
     if (!isEdit) return;
     const load = async () => {
       try {
         const capsule = await fetchCapsuleById(id);
+        const variationSources = capsule.variations?.length ? capsule.variations : [''];
         setFormState({
           ...baseState,
           ...capsule,
           price: capsule.price ?? '',
-          gallery: capsule.gallery && capsule.gallery.length ? capsule.gallery : [''],
           tags: capsule.tags || [],
           colorPalette: capsule.colorPalette || [],
           aspectRatio: capsule.aspectRatio || '',
           prompt: capsule.prompt || '',
-          variations: capsule.variations && capsule.variations.length ? capsule.variations : [''],
+          variations: variationSources,
           resolutions: capsule.resolutions && Object.keys(capsule.resolutions).length
             ? Object.entries(capsule.resolutions).map(([label, url]) => ({ label, url }))
             : [{ label: '', url: '' }],
@@ -91,6 +188,27 @@ const CapsuleForm = () => {
     };
     load();
   }, [id, isEdit]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadTags = async () => {
+      try {
+        const docs = await fetchCapsules();
+        if (cancelled) return;
+        const tagSet = new Set();
+        docs.forEach((capsule) => {
+          capsule.tags?.forEach((tag) => tagSet.add(tag));
+        });
+        setAvailableTags(Array.from(tagSet).sort((a, b) => a.localeCompare(b)));
+      } catch (err) {
+        console.warn('Unable to load tag suggestions', err);
+      }
+    };
+    loadTags();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const title = isEdit ? 'Edit Capsule' : 'Add Capsule';
 
@@ -110,14 +228,44 @@ const CapsuleForm = () => {
       [name]: type === 'checkbox' ? checked : value,
     }));
 
+    if (name === 'fileType') {
+      const hasValue = Boolean(value.trim());
+      setFileTypeManuallySet(hasValue);
+      if (!hasValue) {
+        const guess = guessFileTypeFromUrl(formState.mainImage);
+        if (guess) {
+          setFormState((prev) => ({ ...prev, fileType: guess }));
+        }
+      }
+    }
+
     if (name === 'aspectRatio') {
-      setAspectManuallySet(true);
-      setAspectStatus(value ? 'manual' : 'manual');
+      const hasValue = Boolean(value);
+      setAspectManuallySet(hasValue);
+      setAspectStatus(hasValue ? 'manual' : 'idle');
+      setAspectConfidence(null);
     }
 
     if (name === 'mainImage') {
+      const nextStatus = computeDetectionStatus(value);
       setAspectManuallySet(false);
-      setAspectStatus(value ? (isLikelyUrl(value) ? 'detecting' : 'pending') : 'idle');
+      setAspectStatus(nextStatus);
+      setAspectConfidence(null);
+      setResolutionManuallySet(false);
+      setResolutionStatus(nextStatus);
+      setDetectedResolution('');
+      if (!fileTypeManuallySet) {
+        const guess = guessFileTypeFromUrl(value);
+        if (guess) {
+          setFormState((prev) => ({ ...prev, fileType: guess }));
+        }
+      }
+    }
+
+    if (name === 'resolution') {
+      const hasValue = Boolean(value);
+      setResolutionManuallySet(hasValue);
+      setResolutionStatus(hasValue ? 'manual' : 'idle');
     }
   };
 
@@ -128,52 +276,105 @@ const CapsuleForm = () => {
       if (!aspectManuallySet) {
         setFormState((prev) => ({ ...prev, aspectRatio: '' }));
       }
+      if (!resolutionManuallySet) {
+        setFormState((prev) => ({ ...prev, resolution: '' }));
+      }
+      setAspectConfidence(null);
+      setDetectedResolution('');
       setAspectStatus('idle');
+      setResolutionStatus('idle');
       return;
     }
 
     if (!isLikelyUrl(imageUrl)) {
       setAspectStatus(aspectManuallySet ? 'manual' : 'pending');
+      setResolutionStatus(resolutionManuallySet ? 'manual' : 'pending');
       return;
     }
 
-    if (aspectManuallySet) {
+    if (aspectManuallySet && resolutionManuallySet) {
       setAspectStatus('manual');
+      setResolutionStatus('manual');
       return;
     }
 
     let cancelled = false;
-    setAspectStatus('detecting');
+    setAspectStatus(aspectManuallySet ? 'manual' : 'detecting');
+    setResolutionStatus(resolutionManuallySet ? 'manual' : 'detecting');
+
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       if (cancelled) return;
-      const ratio = formatAspectRatioFromDimensions(img.naturalWidth, img.naturalHeight);
-      if (ratio) {
-        setFormState((prev) => ({ ...prev, aspectRatio: ratio }));
-        setAspectStatus('success');
-      } else {
-        setAspectStatus('error');
+      const { naturalWidth, naturalHeight } = img;
+
+      if (!aspectManuallySet) {
+        const ratio = formatAspectRatioFromDimensions(naturalWidth, naturalHeight);
+        if (ratio) {
+          setFormState((prev) => ({ ...prev, aspectRatio: ratio }));
+          setAspectStatus('success');
+          setAspectConfidence(evaluateAspectConfidence(naturalWidth, naturalHeight));
+        } else {
+          setAspectStatus('error');
+          setAspectConfidence(null);
+        }
+      }
+
+      const detected = `${Math.round(naturalWidth)}x${Math.round(naturalHeight)}`;
+      setDetectedResolution(detected);
+
+      if (!resolutionManuallySet) {
+        setFormState((prev) => ({ ...prev, resolution: detected }));
+        setResolutionStatus('success');
       }
     };
     img.onerror = () => {
-      if (!cancelled) setAspectStatus('error');
+      if (cancelled) return;
+      if (!aspectManuallySet) {
+        setAspectStatus('error');
+        setAspectConfidence(null);
+      }
+      if (!resolutionManuallySet) {
+        setResolutionStatus('error');
+      }
+      setDetectedResolution('');
     };
     img.src = withCacheBuster(imageUrl);
 
     return () => {
       cancelled = true;
     };
-  }, [formState.mainImage, aspectManuallySet]);
+  }, [formState.mainImage, aspectManuallySet, resolutionManuallySet]);
 
-  const aspectStatusCopy = {
-    idle: '',
-    pending: 'Awaiting image…',
-    detecting: 'Detecting…',
-    success: 'Auto-detected',
-    error: 'Unable to detect',
-    manual: 'Manual override',
-  };
+  useEffect(() => {
+    if (fileTypeManuallySet) return;
+    const guess = guessFileTypeFromUrl(formState.mainImage);
+    if (!guess) return;
+    setFormState((prev) => {
+      if (prev.fileType === guess) return prev;
+      return { ...prev, fileType: guess };
+    });
+  }, [formState.mainImage, fileTypeManuallySet]);
+
+  const aspectStatusMessage = useMemo(() => {
+    if (aspectStatus === 'success' && aspectConfidence) {
+      const levelCopy = {
+        excellent: 'High confidence',
+        good: 'Good confidence',
+        approximate: 'Approximate match',
+      }[aspectConfidence.level];
+      const matchCopy = aspectConfidence.match ? ` · near ${aspectConfidence.match}` : '';
+      return `${ASPECT_STATUS_COPY.success} · ${levelCopy}${matchCopy}`;
+    }
+    return ASPECT_STATUS_COPY[aspectStatus];
+  }, [aspectStatus, aspectConfidence]);
+
+  const resolutionStatusMessage = useMemo(() => {
+    if (resolutionStatus === 'success' && detectedResolution) {
+      return `${RESOLUTION_STATUS_COPY.success} · ${detectedResolution.replace('x', ' × ')}`;
+    }
+    return RESOLUTION_STATUS_COPY[resolutionStatus];
+  }, [resolutionStatus, detectedResolution]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -189,11 +390,8 @@ const CapsuleForm = () => {
       title: formState.title.trim(),
       price: Number(formState.price),
       mainImage: formState.mainImage.trim(),
-      gallery: formState.gallery.filter(Boolean),
       description: formState.description.trim(),
-      story: formState.story.trim(),
       tags: formState.tags,
-      mood: formState.mood.trim(),
       colorPalette: formState.colorPalette,
       aspectRatio: formState.aspectRatio,
       prompt: formState.prompt.trim(),
@@ -241,7 +439,10 @@ const CapsuleForm = () => {
 
       <section className="grid gap-6 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Title</span>
+          <span className="inline-flex items-center text-xs uppercase tracking-[0.35em] text-mist">
+            Title
+            <RequiredMark />
+          </span>
           <input
             type="text"
             name="title"
@@ -252,7 +453,10 @@ const CapsuleForm = () => {
           />
         </label>
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Price (USD)</span>
+          <span className="inline-flex items-center text-xs uppercase tracking-[0.35em] text-mist">
+            Price (USD)
+            <RequiredMark />
+          </span>
           <input
             type="number"
             min="0"
@@ -265,7 +469,10 @@ const CapsuleForm = () => {
           />
         </label>
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Main Image</span>
+          <span className="inline-flex items-center text-xs uppercase tracking-[0.35em] text-mist">
+            Main Image
+            <RequiredMark />
+          </span>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="url"
@@ -291,7 +498,14 @@ const CapsuleForm = () => {
           </p>
         </label>
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Primary Resolution</span>
+          <span className="text-xs uppercase tracking-[0.35em] text-mist">
+            Primary Resolution
+            {resolutionStatusMessage && (
+              <span className="ml-2 text-[0.55rem] tracking-[0.2em] text-slate-400">
+                {resolutionStatusMessage}
+              </span>
+            )}
+          </span>
           <input
             type="text"
             name="resolution"
@@ -303,47 +517,31 @@ const CapsuleForm = () => {
         </label>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Description</span>
-          <textarea
-            name="description"
-            rows="3"
-            value={formState.description}
-            onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Story</span>
-          <textarea
-            name="story"
-            rows="3"
-            value={formState.story}
-            onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
-          />
-        </div>
+      <section className="space-y-2">
+        <span className="inline-flex items-center text-xs uppercase tracking-[0.35em] text-mist">
+          Catalogue Description
+          <RequiredMark />
+        </span>
+        <textarea
+          name="description"
+          rows="4"
+          value={formState.description}
+          onChange={handleChange}
+          className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
+          required
+        />
+        <p className="text-xs text-slate-400">
+          Appears on the storefront card and modal. Keep it concise but descriptive.
+        </p>
       </section>
 
       <section className="grid gap-6 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Mood</span>
-          <input
-            type="text"
-            name="mood"
-            value={formState.mood}
-            onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
-          />
-        </label>
-        <label className="space-y-2">
           <span className="text-xs uppercase tracking-[0.35em] text-mist">
             Aspect Ratio
-            {aspectStatusCopy[aspectStatus] && (
+            {aspectStatusMessage && (
               <span className="ml-2 text-[0.55rem] tracking-[0.2em] text-slate-400">
-                {aspectStatusCopy[aspectStatus]}
+                {aspectStatusMessage}
               </span>
             )}
           </span>
@@ -354,17 +552,11 @@ const CapsuleForm = () => {
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
           >
             <option value="">Leave blank</option>
-            <option value="1:1">1:1</option>
-            <option value="4:3">4:3</option>
-            <option value="5:4">5:4</option>
-            <option value="3:4">3:4</option>
-            <option value="4:5">4:5</option>
-            <option value="3:2">3:2</option>
-            <option value="2:3">2:3</option>
-            <option value="16:9">16:9</option>
-            <option value="9:16">9:16</option>
-            <option value="2:1">2:1</option>
-            <option value="1:2">1:2</option>
+            {ASPECT_RATIO_OPTIONS.map((ratio) => (
+              <option key={ratio} value={ratio}>
+                {ratio}
+              </option>
+            ))}
           </select>
         </label>
         <label className="space-y-2">
@@ -377,7 +569,7 @@ const CapsuleForm = () => {
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
           />
         </label>
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <span className="text-xs uppercase tracking-[0.35em] text-mist">Prompt</span>
           <textarea
             name="prompt"
@@ -386,29 +578,29 @@ const CapsuleForm = () => {
             onChange={handleChange}
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
           />
+          <p className="text-xs text-slate-400">
+            Stored securely — the storefront blurs this field until a purchase unlocks it.
+          </p>
         </div>
       </section>
 
-      <GalleryInput
-        label="Gallery Images"
-        values={formState.gallery}
-        onChange={(gallery) => setFormState((prev) => ({ ...prev, gallery }))}
-        enableUpload
-        uploadLabel="Upload"
-      />
-
-      <GalleryInput
-        label="Variations"
-        placeholder="https://cdn.framevist.com/capsule-variation.jpg"
-        values={formState.variations}
-        onChange={(variations) => setFormState((prev) => ({ ...prev, variations }))}
-        enableUpload
-        uploadLabel="Upload"
-      />
+      <div className="space-y-2">
+        <VariationsInput
+          placeholder="https://cdn.framevist.com/capsule-variation.jpg"
+          values={formState.variations}
+          onChange={(variations) => setFormState((prev) => ({ ...prev, variations }))}
+          enableUpload
+          uploadLabel="Upload"
+        />
+        <p className="text-xs text-slate-400">
+          Variations replace the old gallery and appear as selectable thumbnails in the storefront modal.
+        </p>
+      </div>
 
       <TagInput
         values={formState.tags}
         onChange={(tags) => setFormState((prev) => ({ ...prev, tags }))}
+        suggestions={availableTags}
       />
 
       <ColorPicker
@@ -421,16 +613,62 @@ const CapsuleForm = () => {
         onChange={(resolutions) => setFormState((prev) => ({ ...prev, resolutions }))}
       />
 
-      <label className="inline-flex items-center gap-3 text-sm text-slate-600">
-        <input
-          type="checkbox"
-          name="published"
-          checked={formState.published}
-          onChange={handleChange}
-          className="h-5 w-5 rounded border-slate-300 text-ink focus:ring-ink"
-        />
-        <span>Published</span>
-      </label>
+      <section className="flex flex-col gap-4 rounded-[28px] border border-slate-200/60 bg-white/80 p-5 shadow-inner md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.35em] text-mist">Visibility</p>
+          <p className="text-sm text-slate-500">
+            {formState.published
+              ? 'This capsule is live on the storefront.'
+              : 'Keep as draft until you toggle publishing.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            setFormState((prev) => ({
+              ...prev,
+              published: !prev.published,
+            }))
+          }
+          aria-pressed={formState.published}
+          className={`group relative flex w-full max-w-sm items-center gap-4 rounded-[999px] border px-4 py-3 text-left transition ${
+            formState.published
+              ? 'border-emerald-200 bg-emerald-50/70'
+              : 'border-slate-200 bg-white'
+          }`}
+        >
+          <span className="sr-only">Toggle published</span>
+          <span
+            className={`flex h-10 w-10 items-center justify-center rounded-2xl text-white shadow-lg transition ${
+              formState.published ? 'bg-emerald-500' : 'bg-slate-300 text-slate-600'
+            }`}
+            aria-hidden="true"
+          >
+            {formState.published ? <FaCheck className="h-4 w-4" /> : <FaPause className="h-4 w-4" />}
+          </span>
+          <div className="flex flex-col">
+            <span className="text-[0.55rem] uppercase tracking-[0.35em] text-slate-400">Publishing</span>
+            <span className="font-semibold text-ink">
+              {formState.published ? 'Live for collectors' : 'Hidden draft'}
+            </span>
+            <span className="text-xs text-slate-500">
+              {formState.published ? 'Visible across the storefront' : 'Stays private until you publish'}
+            </span>
+          </div>
+          <span
+            className={`ml-auto inline-flex h-7 w-14 items-center rounded-full transition ${
+              formState.published ? 'bg-emerald-500/70' : 'bg-slate-300/80'
+            }`}
+            aria-hidden="true"
+          >
+            <span
+              className={`h-5 w-5 rounded-full bg-white shadow-sm transition ${
+                formState.published ? 'translate-x-7' : 'translate-x-1'
+              }`}
+            />
+          </span>
+        </button>
+      </section>
 
       <div className="flex flex-wrap gap-3">
         <button

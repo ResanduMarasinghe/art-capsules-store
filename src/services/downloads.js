@@ -56,9 +56,6 @@ export const downloadCapsuleBundle = async (order) => {
 
     const assets = [];
     addAsset(assets, item.mainImage || item.image, (ext) => `primary.${ext}`);
-    item.gallery?.forEach((url, idx) => {
-      addAsset(assets, url, (ext) => `gallery/gallery-${idx + 1}.${ext}`);
-    });
     item.variations?.forEach((url, idx) => {
       addAsset(assets, url, (ext) => `variations/variation-${idx + 1}.${ext}`);
     });

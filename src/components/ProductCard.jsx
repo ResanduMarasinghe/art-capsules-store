@@ -6,8 +6,7 @@ const ProductCard = ({ product, onAddToCart }) => {
   const openModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
 
-  const coverImage =
-    product.mainImage || product.image || product.gallery?.[0] || product.variations?.[0] || '';
+  const coverImage = product.mainImage || product.image || product.variations?.[0] || '';
   const aspectRatioValue = product.aspectRatioValue || '1 / 1';
 
   return (

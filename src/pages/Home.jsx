@@ -77,7 +77,7 @@ const Home = ({
           </h1>
           <p className="text-sm leading-relaxed text-slate-500 sm:text-base">
             Frame Vist is a curated space of digital artistry, crafted, refined, and delivered as immersive art capsules.
-            Every piece is a moment, a mood, a visual experience waiting to be explored.
+            Every piece is a moment, a visual experience waiting to be explored.
           </p>
           <a
             href="#catalogue"
@@ -142,7 +142,7 @@ const Home = ({
               <span className="sr-only">Search capsules</span>
               <input
                 type="search"
-                placeholder="Search titles, artists, moods..."
+                placeholder="Search titles, artists, tags..."
                 value={searchQuery}
                 onChange={(event) => onSearchChange?.(event.target.value)}
                 className="w-full rounded-full border border-slate-200 bg-white/80 px-5 py-3 text-sm text-ink outline-none transition focus:border-ink focus:bg-white"

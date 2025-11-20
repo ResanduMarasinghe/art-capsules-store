@@ -78,7 +78,11 @@ const CapsulesList = () => {
                       )}
                       <div>
                         <p className="font-semibold text-ink">{capsule.title}</p>
-                        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{capsule.mood}</p>
+                        {capsule.tags?.length ? (
+                          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                            {capsule.tags.slice(0, 3).join(' · ')}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </td>

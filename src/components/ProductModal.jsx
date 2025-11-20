@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FaXmark } from 'react-icons/fa6';
+import { FaLock, FaXmark } from 'react-icons/fa6';
 
 const DetailBadge = ({ label, value }) => (
   <div className="rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-inner">
@@ -19,13 +20,18 @@ const PaletteSwatch = ({ hex }) => (
 );
 
 const ProductModal = ({ product, onClose, onAddToCart }) => {
-  const heroImage =
-    product.mainImage || product.image || product.gallery?.[0] || product.variations?.[0] || '';
-  const galleryImages = product.gallery?.filter(Boolean) || [];
+  const heroImage = product.mainImage || product.image || product.variations?.[0] || '';
   const variations = product.variations?.filter(Boolean) || [];
   const colorPalette = product.colorPalette?.filter(Boolean) || [];
   const resolutionEntries = product.resolutions ? Object.entries(product.resolutions) : [];
   const aspectRatioValue = product.aspectRatioValue || '1 / 1';
+  const [activeImage, setActiveImage] = useState(heroImage);
+
+  const variationSources = Array.from(new Set([heroImage, ...variations].filter(Boolean)));
+
+  const handleThumbnailSelect = (imageUrl) => {
+    setActiveImage(imageUrl);
+  };
 
   if (typeof document === 'undefined') {
     return null;
@@ -59,7 +65,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
             style={{ aspectRatio: aspectRatioValue }}
           >
             <img
-              src={heroImage}
+              src={activeImage || heroImage}
               alt={product.title}
               className="absolute inset-0 h-full w-full object-contain transition duration-700 ease-out hover:scale-[1.03]"
               loading="lazy"
@@ -72,10 +78,25 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
               <h3 className="font-display text-4xl leading-tight text-ink">{product.title}</h3>
               <p className="text-base leading-relaxed text-slate-600">{product.description}</p>
             </div>
-            {product.story && (
-              <div className="rounded-3xl border border-slate-100 bg-white/60 p-4 shadow-inner">
-                <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist">Artist Story</p>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{product.story}</p>
+            {product.prompt && (
+              <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-white/80 p-4 shadow-inner">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink/90 text-white shadow-lg shadow-ink/30">
+                    <FaLock className="h-4 w-4" aria-hidden="true" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist">Creator Prompt</p>
+                    <p className="relative text-sm leading-relaxed text-slate-600">
+                      <span className="relative block select-none text-slate-500/90 blur-sm">
+                        {product.prompt}
+                      </span>
+                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-ink/70">
+                      Purchase to unlock the exact prompt & render settings
+                    </p>
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/70 via-white/10 to-white/70 backdrop-blur-[2px]" />
               </div>
             )}
             {product.tags?.length ? (
@@ -91,12 +112,10 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
               </div>
             ) : null}
             <div className="grid gap-3 sm:grid-cols-2">
-              <DetailBadge label="Mood" value={product.mood || 'Curated'} />
               <DetailBadge label="Availability" value={product.published ? 'Available now' : 'Coming soon'} />
               <DetailBadge label="Aspect" value={product.aspectRatio || '1:1'} />
               <DetailBadge label="Primary Resolution" value={product.resolution || '—'} />
               <DetailBadge label="File Type" value={product.fileType || 'JPG'} />
-              <DetailBadge label="Prompt" value={product.prompt || 'Studio-kept secret'} />
             </div>
             {resolutionEntries.length > 0 && (
               <div className="space-y-2">
@@ -125,21 +144,31 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
                 </div>
               </div>
             )}
-            {(galleryImages.length > 1 || variations.length > 0) && (
+            {variationSources.length > 1 && (
               <div className="space-y-3">
-                <p className="text-xs uppercase tracking-[0.35em] text-mist">Gallery</p>
-                <div className="flex gap-4 overflow-x-auto pb-2">
-                  {[heroImage, ...galleryImages.slice(1), ...variations]
-                    .filter(Boolean)
-                    .map((imageUrl) => (
-                      <img
+                <p className="text-xs uppercase tracking-[0.35em] text-mist">Variations</p>
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {variationSources.map((imageUrl) => {
+                    const isActive = imageUrl === (activeImage || heroImage);
+                    return (
+                      <button
+                        type="button"
                         key={imageUrl}
-                        src={imageUrl}
-                        alt={`${product.title} preview`}
-                        className="h-24 w-24 flex-shrink-0 rounded-2xl object-cover shadow-md"
-                        loading="lazy"
-                      />
-                    ))}
+                        onClick={() => handleThumbnailSelect(imageUrl)}
+                        className={`flex-shrink-0 rounded-2xl border-2 p-1 transition hover:border-ink/40 ${
+                          isActive ? 'border-ink bg-ink/5' : 'border-transparent bg-white/70'
+                        }`}
+                        aria-label={`View alternate angle of ${product.title}`}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`${product.title} preview`}
+                          className="h-24 w-24 rounded-xl object-cover shadow-md"
+                          loading="lazy"
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
