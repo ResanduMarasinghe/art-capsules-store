@@ -10,7 +10,8 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase.js';
+import { syncTagUsage } from './tags.js';
 
 const capsulesRef = collection(db, 'capsules');
 const capsuleCounterRef = doc(db, 'metadata', 'capsulesCounter');
@@ -59,21 +60,33 @@ export const createCapsule = async (data) => {
   };
 
   await setDoc(documentRef, payload);
+  await syncTagUsage([], payload.tags || []);
   return capsuleId;
 };
 
 export const updateCapsule = async (id, data) => {
   const documentRef = doc(db, 'capsules', id);
+  const snapshot = await getDoc(documentRef);
+  if (!snapshot.exists()) {
+    throw new Error('Capsule not found');
+  }
+  const previousTags = snapshot.data()?.tags || [];
   await updateDoc(documentRef, {
     ...data,
     stats: data.stats || defaultStats,
     updatedAt: serverTimestamp(),
   });
+  await syncTagUsage(previousTags, data.tags || []);
 };
 
 export const deleteCapsule = async (id) => {
   const documentRef = doc(db, 'capsules', id);
+  const snapshot = await getDoc(documentRef);
+  const previousTags = snapshot.exists() ? snapshot.data()?.tags || [] : [];
   await deleteDoc(documentRef);
+  if (previousTags.length) {
+    await syncTagUsage(previousTags, []);
+  }
 };
 
 export const setCapsulePublished = async (id, published) => {

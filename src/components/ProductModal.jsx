@@ -79,24 +79,24 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
               <p className="text-base leading-relaxed text-slate-600">{product.description}</p>
             </div>
             {product.prompt && (
-              <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-white/80 p-4 shadow-inner">
+              <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-br from-white/95 via-white/80 to-slate-50/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink/90 text-white shadow-lg shadow-ink/30">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink text-white shadow-lg shadow-ink/30">
                     <FaLock className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist">Creator Prompt</p>
-                    <p className="relative text-sm leading-relaxed text-slate-600">
-                      <span className="relative block select-none text-slate-500/90 blur-sm">
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist">Creator Prompt</p>
+                      <p className="text-xs text-slate-400">Locked until purchase</p>
+                    </div>
+                    <p className="relative rounded-2xl border border-dashed border-slate-200/80 bg-white/70 p-3 text-sm text-slate-500">
+                      <span className="block select-none text-slate-500/80 blur-sm">
                         {product.prompt}
                       </span>
-                    </p>
-                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-ink/70">
-                      Purchase to unlock the exact prompt & render settings
+                      <span className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-r from-white/80 via-white/40 to-white/80" aria-hidden="true" />
                     </p>
                   </div>
                 </div>
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/70 via-white/10 to-white/70 backdrop-blur-[2px]" />
               </div>
             )}
             {product.tags?.length ? (

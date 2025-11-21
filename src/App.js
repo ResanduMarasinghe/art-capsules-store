@@ -25,6 +25,11 @@ const Storefront = () => {
   const [activeSection, setActiveSection] = useState('experience');
   const { capsules, loading: capsulesLoading, error: capsulesError, tags } = useCapsules();
 
+  useEffect(() => {
+    document.title =
+      activePage === 'checkout' ? 'Frame Vist — Checkout' : 'Frame Vist — Capsules';
+  }, [activePage]);
+
 
   useEffect(() => {
     const handleScroll = () => {

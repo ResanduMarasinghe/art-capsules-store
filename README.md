@@ -200,6 +200,23 @@ The suite currently relies on `react-scripts test` with Testing Library utilitie
 npm run build
 ```
 
+### Backfill existing tag usage
+
+When migrating to the dedicated `tags` collection, run the automated backfill to rescan every capsule and rebuild usage counts:
+
+```bash
+npm run backfill:tags
+```
+
+The script will:
+
+1. Load Firebase credentials from `.env.local` (preferred) and `.env` if present.
+2. Pull every capsule via Firestore.
+3. Compare the desired tag usage (based on capsule metadata) against what currently exists in the `tags` collection.
+4. Increment, decrement, or delete tag docs so counts stay in sync.
+
+> **Heads-up:** The script relies on the same Firebase client credentials as the React app. Ensure your Firestore security rules allow the authenticated context you run it under (e.g., run `firebase login` + `npm run backfill:tags` while authenticated as an admin user, or execute it against an emulator).
+
 Outputs hashed assets inside `build/`, ready for Firebase Hosting or any static host. Remember to set the appropriate rewrite rules in `firebase.json` for SPA routing.
 
 ## Deployment notes

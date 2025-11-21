@@ -7,7 +7,7 @@ import {
   query,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase.js';
 
 const collectorsRef = collection(db, 'collectorEmails');
 

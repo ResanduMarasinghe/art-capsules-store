@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaPause } from 'react-icons/fa6';
 import { useNavigate, useParams } from 'react-router-dom';
 import TagInput from '../components/TagInput';
+import ModelInput from '../components/ModelInput';
 import ColorPicker from '../components/ColorPicker';
 import ResolutionsInput from '../components/ResolutionsInput';
 import VariationsInput from '../components/VariationsInput';
@@ -12,6 +13,7 @@ import {
   updateCapsule,
 } from '../../services/capsules';
 import ImageUploadButton from '../components/ImageUploadButton';
+import { fetchTags } from '../../services/tags';
 
 const defaultStats = { views: 0, addedToCart: 0, purchases: 0 };
 
@@ -123,6 +125,7 @@ const baseState = {
   mainImage: '',
   description: '',
   tags: [],
+  model: '',
   colorPalette: [],
   aspectRatio: '',
   resolutions: [{ label: '', url: '' }],
@@ -159,6 +162,7 @@ const CapsuleForm = () => {
   const [detectedResolution, setDetectedResolution] = useState('');
   const [fileTypeManuallySet, setFileTypeManuallySet] = useState(false);
   const [availableTags, setAvailableTags] = useState([]);
+  const [availableModels, setAvailableModels] = useState([]);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -171,6 +175,7 @@ const CapsuleForm = () => {
           ...capsule,
           price: capsule.price ?? '',
           tags: capsule.tags || [],
+          model: capsule.model || '',
           colorPalette: capsule.colorPalette || [],
           aspectRatio: capsule.aspectRatio || '',
           prompt: capsule.prompt || '',
@@ -191,20 +196,23 @@ const CapsuleForm = () => {
 
   useEffect(() => {
     let cancelled = false;
-    const loadTags = async () => {
+    const loadMetadata = async () => {
       try {
-        const docs = await fetchCapsules();
+        const [docs, tags] = await Promise.all([fetchCapsules(), fetchTags()]);
         if (cancelled) return;
-        const tagSet = new Set();
+        const modelSet = new Set();
         docs.forEach((capsule) => {
-          capsule.tags?.forEach((tag) => tagSet.add(tag));
+          if (capsule.model) {
+            modelSet.add(capsule.model);
+          }
         });
-        setAvailableTags(Array.from(tagSet).sort((a, b) => a.localeCompare(b)));
+        setAvailableTags(tags);
+        setAvailableModels(Array.from(modelSet).sort((a, b) => a.localeCompare(b)));
       } catch (err) {
-        console.warn('Unable to load tag suggestions', err);
+        console.warn('Unable to load tag/model suggestions', err);
       }
     };
-    loadTags();
+    loadMetadata();
     return () => {
       cancelled = true;
     };
@@ -392,6 +400,7 @@ const CapsuleForm = () => {
       mainImage: formState.mainImage.trim(),
       description: formState.description.trim(),
       tags: formState.tags,
+  model: formState.model.trim(),
       colorPalette: formState.colorPalette,
       aspectRatio: formState.aspectRatio,
       prompt: formState.prompt.trim(),
@@ -601,6 +610,12 @@ const CapsuleForm = () => {
         values={formState.tags}
         onChange={(tags) => setFormState((prev) => ({ ...prev, tags }))}
         suggestions={availableTags}
+      />
+
+      <ModelInput
+        value={formState.model}
+        onChange={(model) => setFormState((prev) => ({ ...prev, model }))}
+        suggestions={availableModels}
       />
 
       <ColorPicker

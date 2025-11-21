@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
@@ -8,8 +9,24 @@ const navItems = [
   { label: 'Analytics', to: '/admin/analytics' },
 ];
 
+const getAdminPageTitle = (pathname = '') => {
+  if (pathname === '/admin') return 'Dashboard';
+  if (pathname === '/admin/capsules') return 'Capsules';
+  if (pathname === '/admin/capsules/new') return 'Add Capsule';
+  if (pathname.startsWith('/admin/capsules/') && pathname.endsWith('/edit')) return 'Edit Capsule';
+  if (pathname.startsWith('/admin/capsules')) return 'Capsules';
+  if (pathname.startsWith('/admin/analytics')) return 'Analytics';
+  return 'Admin';
+};
+
 const AdminLayout = () => {
   const { logout, user } = useAuth();
+  const location = useLocation();
+  const pageTitle = getAdminPageTitle(location.pathname);
+
+  useEffect(() => {
+    document.title = `Frame Vist Admin — ${pageTitle}`;
+  }, [pageTitle]);
 
   const linkClasses = ({ isActive }) =>
     `block rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] transition ${
@@ -33,6 +50,15 @@ const AdminLayout = () => {
                 {item.label}
               </NavLink>
             ))}
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 transition hover:bg-white/50"
+              title="View the storefront as a customer"
+            >
+              View Storefront ↗
+            </a>
           </nav>
           <button
             type="button"
@@ -62,6 +88,15 @@ const AdminLayout = () => {
                 {item.label}
               </NavLink>
             ))}
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 transition hover:bg-white/50"
+              title="View the storefront as a customer"
+            >
+              View Storefront ↗
+            </a>
           </div>
           <main className="rounded-3xl border border-white/40 bg-white/95 p-6 shadow-sm backdrop-blur lg:p-10">
             <Outlet />

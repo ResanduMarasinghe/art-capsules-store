@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase.js';
+import { fetchTags } from '../services/tags';
 
 const capsulesRef = collection(db, 'capsules');
 
@@ -15,6 +16,8 @@ export const useCapsules = () => {
   const [capsules, setCapsules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tags, setTags] = useState(['all']);
+  const [hasLoadedTags, setHasLoadedTags] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -40,13 +43,39 @@ export const useCapsules = () => {
     load();
   }, []);
 
-  const tags = useMemo(() => {
+  useEffect(() => {
+    let cancelled = false;
+    const loadTags = async () => {
+      try {
+        const loaded = await fetchTags();
+        if (cancelled) return;
+        const unique = Array.from(new Set(loaded.filter(Boolean)));
+        setTags(['all', ...unique]);
+        setHasLoadedTags(true);
+      } catch (err) {
+        if (!cancelled) {
+          console.warn('Unable to load tag catalogue', err);
+        }
+      }
+    };
+    loadTags();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (hasLoadedTags) return;
+    if (!capsules.length) return;
     const unique = new Set();
     capsules.forEach((capsule) => {
-      capsule.tags?.forEach((tag) => unique.add(tag));
+      capsule.tags?.forEach((tag) => {
+        if (tag) unique.add(tag);
+      });
     });
-    return ['all', ...Array.from(unique)];
-  }, [capsules]);
+    if (!unique.size) return;
+    setTags(['all', ...Array.from(unique)]);
+  }, [capsules, hasLoadedTags]);
 
   return { capsules, loading, error, tags };
 };

@@ -45,13 +45,22 @@ const Home = ({
 }) => {
   const { addToCart } = useCart();
 
+  const normalizeText = (value) => (typeof value === 'string' ? value : '');
+
   const filteredProducts = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+    const query = (searchQuery || '').trim().toLowerCase();
     return capsules.filter((product) => {
+      const title = normalizeText(product?.title).toLowerCase();
+      const description = normalizeText(product?.description).toLowerCase();
+      const artist = normalizeText(product?.artist).toLowerCase();
+      const tagsText = Array.isArray(product?.tags)
+        ? product.tags.join(' ').toLowerCase()
+        : '';
       const matchesSearch = query
-        ? product.title.toLowerCase().includes(query) ||
-          product.description.toLowerCase().includes(query) ||
-          product.artist.toLowerCase().includes(query)
+        ? title.includes(query) ||
+          description.includes(query) ||
+          artist.includes(query) ||
+          tagsText.includes(query)
         : true;
       const matchesTag = activeTag === 'all' ? true : product.tags?.includes(activeTag);
       return matchesSearch && matchesTag;
