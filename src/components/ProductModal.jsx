@@ -77,6 +77,10 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
               <p className="text-xs uppercase tracking-[0.4em] text-mist">{product.artist}</p>
               <h3 className="font-display text-4xl leading-tight text-ink">{product.title}</h3>
               <p className="text-base leading-relaxed text-slate-600">{product.description}</p>
+              <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200/70 bg-white/80 px-4 py-1 text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">
+                <span>Model</span>
+                <span className="font-semibold text-ink/80">{product.model || 'Not specified'}</span>
+              </div>
             </div>
             {product.prompt && (
               <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-br from-white/95 via-white/80 to-slate-50/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
@@ -113,6 +117,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
             ) : null}
             <div className="grid gap-3 sm:grid-cols-2">
               <DetailBadge label="Availability" value={product.published ? 'Available now' : 'Coming soon'} />
+              <DetailBadge label="Model" value={product.model || 'Not specified'} />
               <DetailBadge label="Aspect" value={product.aspectRatio || '1:1'} />
               <DetailBadge label="Primary Resolution" value={product.resolution || '—'} />
               <DetailBadge label="File Type" value={product.fileType || 'JPG'} />

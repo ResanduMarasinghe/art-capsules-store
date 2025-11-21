@@ -77,8 +77,6 @@ const Storefront = () => {
         activeSection={activeSection}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        activeTag={activeTag}
-        onTagChange={setActiveTag}
       />
       {isHomeView ? (
         <Home

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import CatalogueControls from './CatalogueControls';
 import { useCart } from '../context/CartContext';
 
 const sectionProgress = [
@@ -21,9 +20,6 @@ const Header = ({
   activeSection = 'experience',
   searchQuery,
   onSearchChange,
-  tags,
-  activeTag,
-  onTagChange,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cartSummary } = useCart();
@@ -64,15 +60,35 @@ const Header = ({
         </div>
         <div className="hidden flex-1 items-center justify-center sm:flex">
           {showFilters ? (
-            <div className="w-full max-w-4xl rounded-[999px] border border-slate-200/70 bg-white px-6 py-2.5 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
-              <CatalogueControls
-                variant="compact"
-                searchQuery={searchQuery}
-                onSearchChange={onSearchChange}
-                tags={tags}
-                activeTag={activeTag}
-                onTagChange={onTagChange}
-              />
+            <div className="w-full max-w-4xl rounded-[999px] border border-slate-200/70 bg-white/95 px-5 py-2.5 shadow-[0_18px_45px_rgba(15,23,42,0.12)]">
+              <label className="flex w-full items-center gap-4">
+                <span className="sr-only">Search capsules</span>
+                <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-ink/10 text-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    className="h-4 w-4"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M20 20l-3.5-3.5" />
+                  </svg>
+                </span>
+                <div className="flex flex-1 flex-col gap-1">
+                  <span className="text-[0.55rem] uppercase tracking-[0.4em] text-slate-400">
+                    Search catalogue
+                  </span>
+                  <input
+                    type="search"
+                    placeholder="Search titles, artists, tags..."
+                    value={searchQuery}
+                    onChange={(event) => onSearchChange?.(event.target.value)}
+                    className="w-full border-none bg-transparent text-sm text-ink outline-none placeholder:text-slate-400"
+                  />
+                </div>
+              </label>
             </div>
           ) : showProgress ? (
             <div className="h-12 w-full max-w-4xl" aria-hidden="true" />
