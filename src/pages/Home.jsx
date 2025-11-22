@@ -3,53 +3,11 @@ import BentoGrid from '../components/BentoGrid';
 import ProductCard from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 
-const parseAspectRatio = (aspectRatio = '1:1') => {
-  const [rawWidth, rawHeight] = (aspectRatio || '1:1').split(':').map(Number);
-  if (!rawWidth || !rawHeight) return 1;
-  return rawWidth / rawHeight;
-};
-
-const deriveBentoSpan = (aspectRatio = '1:1', index = 0) => {
-  const ratio = parseAspectRatio(aspectRatio);
-  let width = 1;
-  let height = 1;
-
-  if (ratio >= 1.9) {
-    width = 4;
-  } else if (ratio >= 1.35) {
-    width = 2;
-  }
-
-  if (ratio <= 0.5) {
-    height = 3;
-  } else if (ratio <= 0.75) {
-    height = 2;
-  }
-
-  if (index % 7 === 0) {
-    height = Math.min(3, height + 1);
-  } else if (index % 5 === 0) {
-    width = Math.min(4, width + 1);
-  }
-
-  return {
-    width: Math.max(1, width),
-    height: Math.max(1, height),
-  };
-};
-
 const getColumnsForViewport = (width) => {
   if (width >= 1280) return 5;
   if (width >= 1024) return 4;
   if (width >= 640) return 2;
   return 1;
-};
-
-const getRowHeightForCols = (cols) => {
-  if (cols >= 5) return 200;
-  if (cols >= 4) return 190;
-  if (cols >= 2) return 220;
-  return 260;
 };
 
 const Home = ({
@@ -101,18 +59,14 @@ const Home = ({
   }, [searchQuery, activeTag, capsules]);
 
   const bentoItems = useMemo(() => {
-    return filteredProducts.map((product, index) => {
-      const spans = deriveBentoSpan(product.aspectRatio, index);
-      const enforcedCols = Math.max(1, gridCols);
-      return {
-        id: product.id ?? index,
-        width: Math.min(spans.width, enforcedCols),
-        height: spans.height,
-        color: 'bg-transparent',
-        element: <ProductCard product={product} onAddToCart={addToCart} />,
-      };
-    });
-  }, [filteredProducts, addToCart, gridCols]);
+    return filteredProducts.map((product, index) => ({
+      id: product.id ?? index,
+      width: 1,
+      height: 1,
+      color: 'bg-transparent',
+      element: <ProductCard product={product} onAddToCart={addToCart} />,
+    }));
+  }, [filteredProducts, addToCart]);
 
   return (
     <>
@@ -237,7 +191,7 @@ const Home = ({
             <BentoGrid
               items={bentoItems}
               gridCols={Math.max(1, gridCols)}
-              rowHeight={getRowHeightForCols(gridCols)}
+              rowHeight={60}
               className="w-full"
               elementClassName="!border-none !bg-transparent !shadow-none !p-0"
             />

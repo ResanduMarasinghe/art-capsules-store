@@ -7,13 +7,11 @@ const ProductCard = ({ product, onAddToCart }) => {
   const closeModal = () => setOpen(false);
 
   const coverImage = product.mainImage || product.image || product.variations?.[0] || '';
-  const aspectRatioValue = product.aspectRatioValue || '1 / 1';
 
   return (
-    <article className="group glass-panel relative flex h-full flex-col overflow-hidden rounded-[28px] border border-white/30 bg-white/70 shadow-frame transition duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-ink/10">
+    <article className="group glass-panel relative flex flex-col overflow-hidden rounded-[28px] border border-white/30 bg-white/70 shadow-frame transition duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-ink/10">
       <div
         className="relative w-full cursor-pointer overflow-hidden bg-slate-100"
-        style={{ aspectRatio: aspectRatioValue }}
         onClick={openModal}
         role="button"
         tabIndex={0}
@@ -29,10 +27,10 @@ const ProductCard = ({ product, onAddToCart }) => {
         <img
           src={coverImage}
           alt={product.title}
-          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          className="block w-full h-auto object-cover transition duration-500 group-hover:scale-[1.02]"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent opacity-0 transition group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent opacity-0 transition group-hover:opacity-100" />
       </div>
       <div className="flex flex-1 flex-col gap-4 px-6 py-5">
         <div className="space-y-2">

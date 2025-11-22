@@ -63,6 +63,7 @@ const Cart = () => {
           <span>Subtotal</span>
           <span>${cartSummary.subtotal.toFixed(2)}</span>
         </div>
+            {/* https://github.com/ResanduMarasinghe */}
         <div className="flex justify-between text-slate-500">
           <span>Taxes</span>
           <span>${cartSummary.taxes.toFixed(2)}</span>

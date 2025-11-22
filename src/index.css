@@ -85,3 +85,15 @@ body {
 .animate-about-reveal {
   animation: aboutReveal 0.8s ease-out both;
 }
+
+.bento-grid {
+  width: 100%;
+}
+
+.bento-card {
+  width: 100%;
+}
+
+.bento-card > * {
+  width: 100%;
+}
