@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import BentoGrid from '../components/BentoGrid';
 import ProductCard from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 
@@ -8,29 +9,47 @@ const parseAspectRatio = (aspectRatio = '1:1') => {
   return rawWidth / rawHeight;
 };
 
-const getBentoClasses = (aspectRatio = '1:1', index = 0) => {
+const deriveBentoSpan = (aspectRatio = '1:1', index = 0) => {
   const ratio = parseAspectRatio(aspectRatio);
-  const classes = ['col-span-1'];
+  let width = 1;
+  let height = 1;
 
   if (ratio >= 1.9) {
-    classes.push('sm:col-span-2 lg:col-span-3 xl:col-span-4');
+    width = 4;
   } else if (ratio >= 1.35) {
-    classes.push('sm:col-span-2 lg:col-span-2');
+    width = 2;
   }
 
   if (ratio <= 0.5) {
-    classes.push('sm:row-span-2 lg:row-span-3');
+    height = 3;
   } else if (ratio <= 0.75) {
-    classes.push('sm:row-span-2 lg:row-span-2');
+    height = 2;
   }
 
   if (index % 7 === 0) {
-    classes.push('lg:row-span-2');
+    height = Math.min(3, height + 1);
   } else if (index % 5 === 0) {
-    classes.push('lg:col-span-2');
+    width = Math.min(4, width + 1);
   }
 
-  return classes.join(' ');
+  return {
+    width: Math.max(1, width),
+    height: Math.max(1, height),
+  };
+};
+
+const getColumnsForViewport = (width) => {
+  if (width >= 1280) return 5;
+  if (width >= 1024) return 4;
+  if (width >= 640) return 2;
+  return 1;
+};
+
+const getRowHeightForCols = (cols) => {
+  if (cols >= 5) return 200;
+  if (cols >= 4) return 190;
+  if (cols >= 2) return 220;
+  return 260;
 };
 
 const Home = ({
@@ -44,6 +63,20 @@ const Home = ({
   tags = ['all'],
 }) => {
   const { addToCart } = useCart();
+  const [gridCols, setGridCols] = useState(() => {
+    if (typeof window === 'undefined') return 1;
+    return getColumnsForViewport(window.innerWidth);
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handleResize = () => {
+      setGridCols(getColumnsForViewport(window.innerWidth));
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const normalizeText = (value) => (typeof value === 'string' ? value : '');
 
@@ -66,6 +99,20 @@ const Home = ({
       return matchesSearch && matchesTag;
     });
   }, [searchQuery, activeTag, capsules]);
+
+  const bentoItems = useMemo(() => {
+    return filteredProducts.map((product, index) => {
+      const spans = deriveBentoSpan(product.aspectRatio, index);
+      const enforcedCols = Math.max(1, gridCols);
+      return {
+        id: product.id ?? index,
+        width: Math.min(spans.width, enforcedCols),
+        height: spans.height,
+        color: 'bg-transparent',
+        element: <ProductCard product={product} onAddToCart={addToCart} />,
+      };
+    });
+  }, [filteredProducts, addToCart, gridCols]);
 
   return (
     <>
@@ -187,13 +234,13 @@ const Home = ({
               <p className="mt-3 text-base">{capsulesError}</p>
             </div>
           ) : filteredProducts.length ? (
-            <div className="grid auto-rows-[minmax(240px,_auto)] grid-flow-dense grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 xl:gap-8">
-              {filteredProducts.map((product, index) => (
-                <div key={product.id} className={`${getBentoClasses(product.aspectRatio, index)} h-full`}>
-                  <ProductCard product={product} onAddToCart={addToCart} />
-                </div>
-              ))}
-            </div>
+            <BentoGrid
+              items={bentoItems}
+              gridCols={Math.max(1, gridCols)}
+              rowHeight={getRowHeightForCols(gridCols)}
+              className="w-full"
+              elementClassName="!border-none !bg-transparent !shadow-none !p-0"
+            />
           ) : (
             <div className="glass-panel rounded-[28px] border border-dashed border-slate-200 p-12 text-center text-slate-500">
               <p className="text-sm uppercase tracking-[0.35em] text-mist">No capsules found</p>

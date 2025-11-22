@@ -43,7 +43,7 @@ const ProductCard = ({ product, onAddToCart }) => {
           <span className="font-display text-xl text-ink">${product.price}</span>
           <button
             type="button"
-            className="rounded-full border border-ink/60 px-5 py-2 text-sm font-semibold text-ink transition-all duration-300 hover:border-ink hover:bg-ink hover:text-white"
+            className="rounded-full border border-ink/60 px-5 py-2 text-sm font-semibold text-ink transition-all duration-300 hover:border-ink hover:bg-ink hover:text-white whitespace-nowrap"
             onClick={(event) => {
               event.preventDefault();
               openModal();
