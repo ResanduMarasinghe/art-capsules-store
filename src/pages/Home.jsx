@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import BentoGrid from '../components/BentoGrid';
+import MasonryGrid from '../components/MasonryGrid';
 import ProductCard from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 
@@ -58,10 +58,10 @@ const Home = ({
     });
   }, [searchQuery, activeTag, capsules]);
 
-  const bentoItems = useMemo(() => {
+  const masonryItems = useMemo(() => {
     return filteredProducts.map((product, index) => ({
       id: product.id ?? index,
-      element: <ProductCard product={product} onAddToCart={addToCart} />,
+      element: <ProductCard key={product.id ?? index} product={product} onAddToCart={addToCart} />,
     }));
   }, [filteredProducts, addToCart]);
 
@@ -186,10 +186,10 @@ const Home = ({
             </div>
           ) : filteredProducts.length ? (
             <>
-              {/* Desktop Masonry Layout */}
+              {/* Desktop Masonry Grid */}
               <div className="hidden md:block">
-                <BentoGrid
-                  items={bentoItems}
+                <MasonryGrid
+                  items={masonryItems}
                   columns={Math.max(2, gridCols)}
                   className="w-full"
                 />

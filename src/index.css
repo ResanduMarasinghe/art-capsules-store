@@ -91,6 +91,6 @@ body {
 }
 
 .masonry-item {
-  display: inline-block;
+  display: block;
   width: 100%;
 }

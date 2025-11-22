@@ -1,4 +1,4 @@
-const BentoGrid = ({
+const MasonryGrid = ({
   items = [],
   columns = 3,
   className = '',
@@ -29,4 +29,4 @@ const BentoGrid = ({
   );
 };
 
-export default BentoGrid;
+export default MasonryGrid;
