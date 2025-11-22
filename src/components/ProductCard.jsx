@@ -27,7 +27,7 @@ const ProductCard = ({ product, onAddToCart }) => {
         <img
           src={coverImage}
           alt={product.title}
-          className="block w-full h-auto object-cover transition duration-500 group-hover:scale-[1.02]"
+          className="block w-full h-auto object-cover transition duration-500 group-hover:scale-105"
           loading="lazy"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent opacity-0 transition group-hover:opacity-100" />

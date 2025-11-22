@@ -4,9 +4,9 @@ import ProductCard from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 
 const getColumnsForViewport = (width) => {
-  if (width >= 1280) return 5;
-  if (width >= 1024) return 4;
-  if (width >= 640) return 2;
+  if (width >= 1280) return 4;
+  if (width >= 1024) return 3;
+  if (width >= 768) return 2;
   return 1;
 };
 
@@ -61,9 +61,6 @@ const Home = ({
   const bentoItems = useMemo(() => {
     return filteredProducts.map((product, index) => ({
       id: product.id ?? index,
-      width: 1,
-      height: 1,
-      color: 'bg-transparent',
       element: <ProductCard product={product} onAddToCart={addToCart} />,
     }));
   }, [filteredProducts, addToCart]);
@@ -138,7 +135,7 @@ const Home = ({
         </div>
       </section>
 
-      <main className="mx-auto mt-10 flex max-w-6xl flex-col gap-10 px-6 py-12">
+      <main className="mx-auto mt-10 flex max-w-7xl flex-col gap-10 px-8 py-12 lg:px-12">
         <section
           id="catalogue"
           className="glass-panel flex flex-col gap-6 rounded-[28px] border border-slate-200/60 p-8 shadow-frame"
@@ -188,13 +185,27 @@ const Home = ({
               <p className="mt-3 text-base">{capsulesError}</p>
             </div>
           ) : filteredProducts.length ? (
-            <BentoGrid
-              items={bentoItems}
-              gridCols={Math.max(1, gridCols)}
-              rowHeight={60}
-              className="w-full"
-              elementClassName="!border-none !bg-transparent !shadow-none !p-0"
-            />
+            <>
+              {/* Desktop Masonry Layout */}
+              <div className="hidden md:block">
+                <BentoGrid
+                  items={bentoItems}
+                  columns={Math.max(2, gridCols)}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* Mobile Simple Grid */}
+              <div className="grid gap-6 md:hidden">
+                {filteredProducts.map((product, index) => (
+                  <ProductCard 
+                    key={product.id ?? index} 
+                    product={product} 
+                    onAddToCart={addToCart} 
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <div className="glass-panel rounded-[28px] border border-dashed border-slate-200 p-12 text-center text-slate-500">
               <p className="text-sm uppercase tracking-[0.35em] text-mist">No capsules found</p>

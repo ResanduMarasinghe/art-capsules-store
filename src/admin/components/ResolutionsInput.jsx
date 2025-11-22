@@ -60,6 +60,7 @@ const ResolutionsInput = ({ values = [], onChange }) => {
                 className="rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-ink"
               />
               <div className="space-y-2">
+                {/* https://github.com/ResanduMarasinghe */}
                 <input
                   type="url"
                   placeholder="https://cdn.framevist.com/capsule-2048.jpg"

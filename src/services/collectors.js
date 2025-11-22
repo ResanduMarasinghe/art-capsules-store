@@ -21,7 +21,7 @@ const mapSnapshot = (snapshot) =>
       ...data,
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null,
     };
-  });
+  }); // https://github.com/ResanduMarasinghe
 
 export const recordCollectorEmail = async ({ email, name, orderId }) => {
   const normalizedEmail = normalizeEmail(email);

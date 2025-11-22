@@ -86,14 +86,11 @@ body {
   animation: aboutReveal 0.8s ease-out both;
 }
 
-.bento-grid {
+.masonry-grid {
   width: 100%;
 }
 
-.bento-card {
-  width: 100%;
-}
-
-.bento-card > * {
+.masonry-item {
+  display: inline-block;
   width: 100%;
 }

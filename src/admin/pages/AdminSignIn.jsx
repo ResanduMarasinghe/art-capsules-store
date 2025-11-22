@@ -24,6 +24,7 @@ const AdminSignIn = () => {
       setStatus('idle');
     }
   };
+  {/* https://github.com/ResanduMarasinghe */}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pearl via-white to-pearl px-6 py-12">
