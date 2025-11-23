@@ -49,11 +49,11 @@ const AdminDashboard = () => {
     date instanceof Date ? date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.35em] text-mist">Overview</p>
-        <h1 className="font-display text-3xl text-ink">Frame Vist Operations</h1>
-        <p className="max-w-2xl text-sm text-slate-500">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="space-y-2 sm:space-y-3">
+        <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist sm:text-xs">Overview</p>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Frame Vist Operations</h1>
+        <p className="max-w-2xl text-xs leading-relaxed text-slate-500 sm:text-sm">
           Monitor capsules, review drop performance, and keep the collection curated. Use the sidebar to
           add new capsules, adjust pricing, or review analytics.
         </p>
@@ -61,32 +61,62 @@ const AdminDashboard = () => {
 
       {error && <p className="text-sm text-rose-500">{error}</p>}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-3xl border border-slate-100 bg-white/80 p-6 shadow-inner">
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Total Revenue</p>
-          <p className="mt-4 font-display text-4xl text-ink">{formatCurrency(stats.revenue || 0)}</p>
-          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-400">aura capsules sold</p>
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6">
+          <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Total Revenue</p>
+          <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{formatCurrency(stats.revenue || 0)}</p>
+          <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">aura capsules sold</p>
         </div>
-        <div className="rounded-3xl border border-slate-100 bg-white/80 p-6 shadow-inner">
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Orders</p>
-          <p className="mt-4 font-display text-4xl text-ink">{stats.orders}</p>
-          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-400">lifetime frames curated</p>
+        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6">
+          <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Orders</p>
+          <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{stats.orders}</p>
+          <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">lifetime frames curated</p>
         </div>
-        <div className="rounded-3xl border border-slate-100 bg-white/80 p-6 shadow-inner">
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Pieces sold</p>
-          <p className="mt-4 font-display text-4xl text-ink">{stats.pieces}</p>
-          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-400">individual capsules delivered</p>
+        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6">
+          <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Pieces sold</p>
+          <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{stats.pieces}</p>
+          <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">individual capsules delivered</p>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-mist">Recent orders</p>
-            <h2 className="font-display text-2xl text-ink">Collector activity</h2>
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist sm:text-xs">Recent orders</p>
+            <h2 className="font-display text-xl text-ink sm:text-2xl">Collector activity</h2>
           </div>
         </div>
-        <div className="overflow-x-auto rounded-3xl border border-slate-100 bg-white/80">
+        {/* Mobile Card Layout */}
+        <div className="space-y-3 md:hidden">
+          {loading ? (
+            <p className="py-6 text-center text-sm text-slate-400">Loading orders…</p>
+          ) : recentOrders.length ? (
+            recentOrders.map((order) => (
+              <div key={order.id} className="rounded-2xl border border-slate-100 bg-white/80 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 space-y-2">
+                    <p className="font-semibold text-ink">{order.customerName || 'Collector'}</p>
+                    {order.customerEmail ? (
+                      <p className="text-xs text-slate-400">{order.customerEmail}</p>
+                    ) : null}
+                    <p className="font-mono text-[0.65rem] tracking-[0.2em] text-slate-500">{order.id}</p>
+                  </div>
+                  <p className="font-display text-xl text-ink">{formatCurrency(order.total || 0)}</p>
+                </div>
+                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                  <span className="text-slate-600">
+                    {order.items?.reduce((count, item) => count + (item.quantity || 0), 0) || 0} pieces
+                  </span>
+                  <span className="uppercase tracking-[0.3em] text-slate-400">{formatDate(order.createdAt)}</span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="py-6 text-center text-sm text-slate-400">No orders yet.</p>
+          )}
+        </div>
+        {/* Desktop Table Layout */}
+        <div className="hidden overflow-x-auto rounded-3xl border border-slate-100 bg-white/80 md:block">
           <table className="min-w-full divide-y divide-slate-100 text-left">
             <thead>
               <tr className="text-xs uppercase tracking-[0.3em] text-slate-400">
@@ -137,14 +167,36 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-mist">Collector emails</p>
-            <h2 className="font-display text-2xl text-ink">Mailing list</h2>
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist sm:text-xs">Collector emails</p>
+            <h2 className="font-display text-xl text-ink sm:text-2xl">Mailing list</h2>
           </div>
         </div>
-        <div className="overflow-x-auto rounded-3xl border border-slate-100 bg-white/80">
+        {/* Mobile Card Layout */}
+        <div className="space-y-3 md:hidden">
+          {loading ? (
+            <p className="py-6 text-center text-sm text-slate-400">Loading collector emails…</p>
+          ) : latestCollectors.length ? (
+            latestCollectors.map((collector) => (
+              <div key={collector.id} className="rounded-2xl border border-slate-100 bg-white/80 p-4">
+                <div className="space-y-2">
+                  <p className="font-mono text-xs tracking-[0.2em] text-slate-500">{collector.email}</p>
+                  <p className="text-sm text-slate-600">{collector.name || '—'}</p>
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-[0.65rem]">
+                    <span className="text-slate-400">Order: {collector.orderId || '—'}</span>
+                    <span className="uppercase tracking-[0.3em] text-slate-400">{formatDate(collector.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="py-6 text-center text-sm text-slate-400">No collector emails captured yet.</p>
+          )}
+        </div>
+        {/* Desktop Table Layout */}
+        <div className="hidden overflow-x-auto rounded-3xl border border-slate-100 bg-white/80 md:block">
           <table className="min-w-full divide-y divide-slate-100 text-left">
             <thead>
               <tr className="text-xs uppercase tracking-[0.3em] text-slate-400">

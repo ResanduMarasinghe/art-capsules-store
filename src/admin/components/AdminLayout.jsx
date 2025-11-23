@@ -35,7 +35,7 @@ const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pearl via-white to-pearl">
-      <div className="mx-auto flex max-w-7xl gap-8 px-6 py-10 lg:px-12">
+      <div className="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:px-12 lg:py-10">
         <aside className="hidden w-64 flex-shrink-0 flex-col gap-6 rounded-3xl border border-white/40 bg-white/80 p-6 backdrop-blur lg:flex">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-mist">Frame Vist</p>
@@ -69,20 +69,20 @@ const AdminLayout = () => {
           </button>
         </aside>
         <div className="flex-1">
-          <header className="mb-6 flex items-center justify-between rounded-3xl border border-white/40 bg-white/90 px-4 py-4 shadow-sm backdrop-blur lg:hidden">
+          <header className="mb-4 flex items-center justify-between rounded-3xl border border-white/40 bg-white/90 px-4 py-3 shadow-sm backdrop-blur sm:mb-6 lg:hidden">
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-mist">Frame Vist</p>
-              <h2 className="font-display text-xl text-ink">Admin</h2>
+              <p className="text-[0.65rem] uppercase tracking-[0.4em] text-mist sm:text-xs">Frame Vist</p>
+              <h2 className="font-display text-lg text-ink sm:text-xl">Admin</h2>
             </div>
             <button
               type="button"
               onClick={logout}
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs uppercase tracking-[0.3em] text-slate-600"
+              className="rounded-full border border-slate-200 px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 sm:px-4 sm:py-2 sm:text-xs"
             >
               Sign out
             </button>
           </header>
-          <div className="mb-6 grid gap-3 rounded-3xl border border-white/40 bg-white/90 p-3 text-center backdrop-blur lg:hidden">
+          <div className="mb-4 grid grid-cols-2 gap-2 rounded-3xl border border-white/40 bg-white/90 p-2 backdrop-blur sm:mb-6 sm:gap-3 sm:p-3 lg:hidden">
             {navItems.map((item) => (
               <NavLink key={item.to} to={item.to} className={linkClasses} end={item.to === '/admin'}>
                 {item.label}
@@ -92,13 +92,13 @@ const AdminLayout = () => {
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 transition hover:bg-white/50"
+              className="block rounded-2xl px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 transition hover:bg-white/50 sm:px-4 sm:py-3 sm:text-sm sm:tracking-[0.3em]"
               title="View the storefront as a customer"
             >
-              View Storefront ↗
+              Storefront ↗
             </a>
           </div>
-          <main className="rounded-3xl border border-white/40 bg-white/95 p-6 shadow-sm backdrop-blur lg:p-10">
+          <main className="rounded-3xl border border-white/40 bg-white/95 p-4 shadow-sm backdrop-blur sm:p-6 lg:p-10">
             <Outlet />
           </main>
         </div>
