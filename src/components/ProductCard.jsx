@@ -32,16 +32,16 @@ const ProductCard = ({ product, onAddToCart }) => {
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent opacity-0 transition group-hover:opacity-100" />
       </div>
-      <div className="flex flex-1 flex-col gap-4 px-6 py-5">
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.35em] text-mist">{product.artist}</p>
-          <h3 className="font-display text-2xl text-ink">{product.title}</h3>
+      <div className="flex flex-1 flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
+        <div className="space-y-1.5 sm:space-y-2">
+          <p className="text-[0.65rem] sm:text-xs uppercase tracking-[0.35em] text-mist">{product.artist}</p>
+          <h3 className="font-display text-xl sm:text-2xl text-ink">{product.title}</h3>
         </div>
         <div className="mt-auto flex items-center justify-between">
-          <span className="font-display text-xl text-ink">${product.price}</span>
+          <span className="font-display text-lg sm:text-xl text-ink">${product.price}</span>
           <button
             type="button"
-            className="rounded-full border border-ink/60 px-5 py-2 text-sm font-semibold text-ink transition-all duration-300 hover:border-ink hover:bg-ink hover:text-white whitespace-nowrap"
+            className="rounded-full border border-ink/60 px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-semibold text-ink transition-all duration-300 hover:border-ink hover:bg-ink hover:text-white whitespace-nowrap"
             onClick={(event) => {
               event.preventDefault();
               openModal();

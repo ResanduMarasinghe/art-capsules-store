@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const CatalogueControls = ({
   searchQuery,
   onSearchChange,
@@ -6,7 +8,13 @@ const CatalogueControls = ({
   onTagChange,
   variant = 'default',
 }) => {
+  const [showAllTags, setShowAllTags] = useState(false);
   const isCompact = variant === 'compact';
+
+  // Featured/popular tags to show initially
+  const featuredTags = ['all', ...tags.slice(1, 7)]; // Show first 6 tags + 'all'
+  const remainingTags = tags.slice(7);
+  const hasMoreTags = remainingTags.length > 0;
 
   if (isCompact) {
     return (
@@ -44,22 +52,66 @@ const CatalogueControls = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-3">
-        {tags.map((tag) => (
-          <button
-            key={tag}
-            type="button"
-            onClick={() => onTagChange?.(tag)}
-            className={`rounded-full border px-5 py-2 text-[0.65rem] uppercase tracking-[0.3em] transition ${
-              activeTag === tag
-                ? 'border-ink bg-ink text-white'
-                : 'border-slate-200 text-slate-500 hover:border-ink/50 hover:text-ink'
-            }`}
-          >
-            {tag}
-          </button>
-        ))}
+      {/* Horizontal Scrollable Tags - Mobile */}
+      <div className="flex md:hidden">
+        <div className="flex w-full gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {tags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => onTagChange?.(tag)}
+              className={`flex-shrink-0 rounded-full border px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] transition ${
+                activeTag === tag
+                  ? 'border-ink bg-ink text-white shadow-md'
+                  : 'border-slate-200 bg-white text-slate-500 hover:border-ink/50 hover:text-ink'
+              }`}
+              aria-pressed={activeTag === tag}
+            >
+              {tag === 'all' ? 'All' : tag}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* Compact Multi-row Grid - Desktop */}
+      <div className="hidden md:block">
+        <div className="flex flex-wrap gap-2">
+          {(showAllTags ? tags : featuredTags).map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => onTagChange?.(tag)}
+              className={`rounded-full border px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.3em] transition ${
+                activeTag === tag
+                  ? 'border-ink bg-ink text-white shadow-md'
+                  : 'border-slate-200 bg-white text-slate-500 hover:border-ink/50 hover:text-ink'
+              }`}
+              aria-pressed={activeTag === tag}
+            >
+              {tag === 'all' ? 'All' : tag}
+            </button>
+          ))}
+          {hasMoreTags && !showAllTags && (
+            <button
+              type="button"
+              onClick={() => setShowAllTags(true)}
+              className="rounded-full border border-dashed border-slate-300 bg-white px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 transition hover:border-ink/50 hover:text-ink"
+            >
+              +{remainingTags.length} more
+            </button>
+          )}
+          {showAllTags && hasMoreTags && (
+            <button
+              type="button"
+              onClick={() => setShowAllTags(false)}
+              className="rounded-full border border-dashed border-slate-300 bg-white px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 transition hover:border-ink/50 hover:text-ink"
+            >
+              Show less
+            </button>
+          )}
+        </div>
+      </div>
+
       <label className="relative w-full md:w-80">
         <span className="sr-only">Search capsules</span>
         <input

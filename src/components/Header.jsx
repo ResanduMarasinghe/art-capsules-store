@@ -36,23 +36,28 @@ const Header = ({
             type="button"
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white text-ink shadow-sm transition hover:border-ink/40 sm:hidden"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            aria-label="Toggle navigation menu"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-nav"
           >
-            <span className="sr-only">Toggle navigation</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              className="h-5 w-5"
-            >
-              <line x1="4" y1="7" x2="20" y2="7" />
-              <line x1="4" y1="12" x2="20" y2="12" />
-              <line x1="4" y1="17" x2="20" y2="17" />
-            </svg>
+            <span className="sr-only">{mobileMenuOpen ? "Close menu" : "Open menu"}</span>
+            <div className="relative h-5 w-5">
+              <span
+                className={`absolute left-0 h-0.5 w-5 origin-center bg-current transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? 'top-[9px] rotate-45' : 'top-[3px] rotate-0'
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-[9px] h-0.5 w-5 bg-current transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? 'opacity-0 scale-75' : 'opacity-100 scale-100'
+                }`}
+              />
+              <span
+                className={`absolute left-0 h-0.5 w-5 origin-center bg-current transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? 'top-[9px] -rotate-45' : 'top-[15px] rotate-0'
+                }`}
+              />
+            </div>
           </button>
           <a href="#top" className="flex-shrink-0 font-display text-xl tracking-[0.3em] text-ink">
             Frame Vist
@@ -119,6 +124,37 @@ const Header = ({
           </span>
         </button>
       </div>
+      {/* Mobile Search Bar */}
+      {showFilters && (
+        <div className="mx-auto w-full max-w-6xl px-6 pb-3 sm:hidden">
+          <div className="w-full rounded-[999px] border border-slate-200/70 bg-white/95 px-4 py-2 shadow-lg">
+            <label className="flex w-full items-center gap-3">
+              <span className="sr-only">Search capsules</span>
+              <span className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-ink/10 text-ink">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  className="h-3.5 w-3.5"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.5-3.5" />
+                </svg>
+              </span>
+              <input
+                type="search"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(event) => onSearchChange?.(event.target.value)}
+                className="w-full border-none bg-transparent text-sm text-ink outline-none placeholder:text-slate-400"
+              />
+            </label>
+          </div>
+        </div>
+      )}
+      
       <div
         id="mobile-nav"
         className={`mx-auto w-full max-w-6xl px-6 pb-4 sm:hidden transition-[max-height] duration-300 ease-in-out ${
@@ -136,7 +172,15 @@ const Header = ({
               <a
                 key={link.key}
                 href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  // Smooth scroll to section
+                  const target = document.querySelector(link.href);
+                  if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
                 className={`flex items-center justify-between rounded-2xl px-4 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.35em] transition ${
                   activeSection === link.key ? 'bg-slate-100 text-ink' : 'text-slate-500 hover:bg-slate-50'
                 }`}

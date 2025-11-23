@@ -53,16 +53,16 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
         <button
           type="button"
           aria-label="Close capsule view"
-          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-ink/80 text-white shadow-lg shadow-ink/30 backdrop-blur-sm transition hover:bg-ink sm:right-6 sm:top-6"
+          className="absolute right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-ink/80 text-white shadow-lg shadow-ink/30 backdrop-blur-sm transition hover:bg-ink sm:right-6 sm:top-6"
           onClick={onClose}
         >
           <FaXmark className="h-4 w-4" />
         </button>
         <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white via-white/80 to-transparent sm:hidden" />
-        <div className="flex h-full flex-col gap-6 overflow-y-auto p-6 sm:gap-8 sm:p-8 md:grid md:grid-cols-[1.1fr,0.9fr]">
+        <div className="flex h-full flex-col gap-6 overflow-y-auto p-6 pt-16 sm:gap-8 sm:p-8 sm:pt-8 md:grid md:grid-cols-[1.1fr,0.9fr]">
           <figure
-            className="relative w-full overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]"
-            style={{ aspectRatio: aspectRatioValue }}
+            className="relative w-full flex-shrink-0 overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]"
+            style={{ aspectRatio: aspectRatioValue, minHeight: '280px' }}
           >
             <img
               src={activeImage || heroImage}
@@ -97,7 +97,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
                       <span className="block select-none text-slate-500/80 blur-sm">
                         {product.prompt}
                       </span>
-                      <span className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-r from-white/80 via-white/40 to-white/80" aria-hidden="true" />
+                      <span className="pointer-events-none absolute inset-0 z-10 rounded-2xl bg-gradient-to-r from-white/80 via-white/40 to-white/80" aria-hidden="true" />
                     </p>
                   </div>
                 </div>

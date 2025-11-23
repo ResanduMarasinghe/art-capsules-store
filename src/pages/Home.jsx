@@ -95,14 +95,15 @@ const Home = ({
         </div>
       </section>
 
-      <section
-        id="about"
-        className="mx-auto mt-10 flex max-w-6xl flex-col rounded-[32px] border border-slate-200/60 bg-white px-8 py-12 shadow-frame"
-      >
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center animate-about-reveal">
-          <div className="space-y-5 text-left">
-            <p className="text-xs uppercase tracking-[0.35em] text-slate-400">About</p>
-            <h2 className="font-display text-3xl text-ink sm:text-4xl">About Frame Vist</h2>
+      <main className="mx-auto mt-10 flex max-w-7xl flex-col gap-10 px-8 py-12 lg:px-12">
+        <section
+          id="about"
+          className="glass-panel flex flex-col rounded-[32px] border border-slate-200/60 bg-white p-8 shadow-frame"
+        >
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center animate-about-reveal">
+            <div className="space-y-5 text-left">
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">About</p>
+              <h2 className="font-display text-3xl text-ink sm:text-4xl">About Frame Vist</h2>
             <p className="text-base leading-relaxed text-slate-600">
               Frame Vist began as a simple idea — turning digital imagination into visually striking moments that anyone can own.
               What started with experimental AI-generated concepts evolved into a curated collection of art capsules, each designed to express a feeling, a story, or a frame in time.
@@ -133,9 +134,8 @@ const Home = ({
             </div>
           </div>
         </div>
-      </section>
+        </section>
 
-      <main className="mx-auto mt-10 flex max-w-7xl flex-col gap-10 px-8 py-12 lg:px-12">
         <section
           id="catalogue"
           className="glass-panel flex flex-col gap-6 rounded-[28px] border border-slate-200/60 p-8 shadow-frame"
@@ -156,19 +156,42 @@ const Home = ({
               />
             </label>
           </div>
-          <div className="flex flex-wrap gap-3">
+          {/* Horizontal Scrollable Tags - Mobile */}
+          <div className="flex md:hidden">
+            <div className="flex w-full gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {tags?.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => onTagChange?.(tag)}
+                  className={`flex-shrink-0 rounded-full border px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] transition ${
+                    activeTag === tag
+                      ? 'border-ink bg-ink text-white shadow-md'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-ink/50 hover:text-ink'
+                  }`}
+                  aria-pressed={activeTag === tag}
+                >
+                  {tag === 'all' ? 'All' : tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Compact Multi-row Grid - Desktop */}
+          <div className="hidden md:flex md:flex-wrap md:gap-2">
             {tags?.map((tag) => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => onTagChange?.(tag)}
-                className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.35em] transition ${
+                className={`rounded-full border px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.3em] transition ${
                   activeTag === tag
-                    ? 'border-ink bg-ink text-white'
-                    : 'border-slate-200 text-slate-500 hover:border-ink/50 hover:text-ink'
+                    ? 'border-ink bg-ink text-white shadow-md'
+                    : 'border-slate-200 bg-white text-slate-500 hover:border-ink/50 hover:text-ink'
                 }`}
+                aria-pressed={activeTag === tag}
               >
-                {tag}
+                {tag === 'all' ? 'All' : tag}
               </button>
             ))}
           </div>
@@ -196,7 +219,7 @@ const Home = ({
               </div>
               
               {/* Mobile Simple Grid */}
-              <div className="grid gap-6 md:hidden">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:hidden">
                 {filteredProducts.map((product, index) => (
                   <ProductCard 
                     key={product.id ?? index} 

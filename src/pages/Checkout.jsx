@@ -77,7 +77,40 @@ const Checkout = () => {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
-      <div className="grid gap-10 lg:grid-cols-[1.1fr,0.9fr]">
+      <div className="grid gap-10 lg:grid-cols-[0.9fr,1.1fr]">
+        <section className="glass-panel rounded-[32px] border border-slate-200/50 p-8 shadow-frame">
+          <h2 className="font-display text-3xl text-ink">Order Summary</h2>
+          <div className="mt-6 space-y-4">
+            {cartItems.length === 0 ? (
+              <p className="text-sm text-slate-500">No capsules selected.</p>
+            ) : (
+              cartItems.map((item) => (
+                <div key={item.id} className="flex items-center justify-between text-sm text-slate-600">
+                  <div>
+                    <p className="font-medium text-ink">{item.title}</p>
+                    <p className="text-mist">Qty: {item.quantity}</p>
+                  </div>
+                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="mt-8 space-y-2 border-t border-slate-200 pt-4 text-sm">
+            <div className="flex justify-between text-slate-500">
+              <span>Subtotal</span>
+              <span>${cartSummary.subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-slate-500">
+              <span>Taxes</span>
+              <span>${cartSummary.taxes.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-lg font-semibold text-ink">
+              <span>Total</span>
+              <span>${cartSummary.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </section>
+        
         <section className="glass-panel rounded-[32px] border border-slate-200/50 p-8 shadow-frame">
           <h2 className="font-display text-3xl text-ink">
             {orderComplete ? 'Order Complete' : 'Secure Checkout'}
@@ -144,38 +177,6 @@ const Checkout = () => {
               )}
             </form>
           )}
-        </section>
-        <section className="glass-panel rounded-[32px] border border-slate-200/50 p-8 shadow-frame">
-          <h2 className="font-display text-3xl text-ink">Order Summary</h2>
-          <div className="mt-6 space-y-4">
-            {cartItems.length === 0 ? (
-              <p className="text-sm text-slate-500">No capsules selected.</p>
-            ) : (
-              cartItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between text-sm text-slate-600">
-                  <div>
-                    <p className="font-medium text-ink">{item.title}</p>
-                    <p className="text-mist">Qty: {item.quantity}</p>
-                  </div>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="mt-8 space-y-2 border-t border-slate-200 pt-4 text-sm">
-            <div className="flex justify-between text-slate-500">
-              <span>Subtotal</span>
-              <span>${cartSummary.subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-slate-500">
-              <span>Taxes</span>
-              <span>${cartSummary.taxes.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-lg font-semibold text-ink">
-              <span>Total</span>
-              <span>${cartSummary.total.toFixed(2)}</span>
-            </div>
-          </div>
         </section>
       </div>
     </main>
