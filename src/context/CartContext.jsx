@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { recordCapsuleAddedToCart } from '../services/capsules';
 
 const CartContext = createContext(null);
 const CART_STORAGE_KEY = 'frame-vist-cart-v1';
@@ -46,11 +47,23 @@ export const CartProvider = ({ children }) => {
     setCartItems((prev) => {
       const existing = prev.find((entry) => entry.id === product.id);
       if (existing) {
+        // Track the additional quantity being added
+        if (product.id) {
+          recordCapsuleAddedToCart(product.id, quantity).catch(error => {
+            console.error('Failed to track add to cart:', error);
+          });
+        }
         return prev.map((entry) =>
           entry.id === product.id
             ? { ...entry, quantity: entry.quantity + quantity }
             : entry
         );
+      }
+      // Track new item added to cart
+      if (product.id) {
+        recordCapsuleAddedToCart(product.id, quantity).catch(error => {
+          console.error('Failed to track add to cart:', error);
+        });
       }
       const image = getCoverImage(product);
       return [...prev, { ...product, image, quantity }];

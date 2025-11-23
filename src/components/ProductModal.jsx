@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FaLock, FaXmark } from 'react-icons/fa6';
+import { recordCapsuleView } from '../services/capsules';
 
 const DetailBadge = ({ label, value }) => (
   <div className="rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-inner">
@@ -26,6 +27,15 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
   const resolutionEntries = product.resolutions ? Object.entries(product.resolutions) : [];
   const aspectRatioValue = product.aspectRatioValue || '1 / 1';
   const [activeImage, setActiveImage] = useState(heroImage);
+
+  // Track view when modal opens
+  useEffect(() => {
+    if (product?.id) {
+      recordCapsuleView(product.id).catch(error => {
+        console.error('Failed to track view:', error);
+      });
+    }
+  }, [product?.id]);
 
   const variationSources = Array.from(new Set([heroImage, ...variations].filter(Boolean)));
 

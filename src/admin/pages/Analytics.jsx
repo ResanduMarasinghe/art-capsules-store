@@ -59,6 +59,11 @@ const Analytics = () => {
           <h1 className="font-display text-2xl text-ink sm:text-3xl">Performance Insights</h1>
           <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-500 sm:text-sm">
             Track revenue, conversions, and top-performing capsules across time periods.
+            {period !== TIME_PERIODS.ALL && (
+              <span className="mt-1 block text-[0.65rem] italic text-slate-400 sm:text-xs">
+                Note: Views and cart metrics for filtered periods are estimated based on purchase data.
+              </span>
+            )}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

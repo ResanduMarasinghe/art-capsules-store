@@ -94,6 +94,22 @@ export const setCapsulePublished = async (id, published) => {
   await updateDoc(documentRef, { published });
 };
 
+export const recordCapsuleView = async (id) => {
+  if (!id) return;
+  const documentRef = doc(db, 'capsules', id);
+  await updateDoc(documentRef, {
+    'stats.views': increment(1),
+  });
+};
+
+export const recordCapsuleAddedToCart = async (id, quantity = 1) => {
+  if (!id) return;
+  const documentRef = doc(db, 'capsules', id);
+  await updateDoc(documentRef, {
+    'stats.addedToCart': increment(quantity),
+  });
+};
+
 export const recordCapsulePurchase = async (id, quantity = 1) => {
   if (!id) return;
   const documentRef = doc(db, 'capsules', id);
