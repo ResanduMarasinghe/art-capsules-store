@@ -70,18 +70,20 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
         </button>
         <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white via-white/80 to-transparent sm:hidden" />
         <div className="flex h-full flex-col gap-6 overflow-y-auto p-6 pt-16 sm:gap-8 sm:p-8 sm:pt-8 md:grid md:grid-cols-[1.1fr,0.9fr]">
-          <figure
-            className="relative w-full flex-shrink-0 overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]"
-            style={{ aspectRatio: aspectRatioValue, minHeight: '280px' }}
-          >
-            <img
-              src={activeImage || heroImage}
-              alt={product.title}
-              className="absolute inset-0 h-full w-full object-contain transition duration-700 ease-out hover:scale-[1.03]"
-              loading="lazy"
-            />
-            <figcaption className="sr-only">{product.title}</figcaption>
-          </figure>
+          <div className="md:sticky md:top-0 md:self-start md:max-h-[calc(90vh-4rem)]">
+            <figure
+              className="relative w-full flex-shrink-0 overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]"
+              style={{ aspectRatio: aspectRatioValue, minHeight: '280px' }}
+            >
+              <img
+                src={activeImage || heroImage}
+                alt={product.title}
+                className="absolute inset-0 h-full w-full object-contain transition duration-700 ease-out hover:scale-[1.03]"
+                loading="lazy"
+              />
+              <figcaption className="sr-only">{product.title}</figcaption>
+            </figure>
+          </div>
           <div className="flex flex-col gap-6">
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.4em] text-mist">{product.artist}</p>

@@ -193,13 +193,14 @@ const Header = ({
         </div>
       </div>
       {showProgress ? (
-        <div className="mx-auto hidden w-full max-w-4xl items-center justify-between gap-4 px-8 pb-3 text-[0.6rem] uppercase tracking-[0.35em] text-slate-400 sm:flex">
+        <div className="mx-auto hidden w-full max-w-4xl items-center justify-center gap-4 px-8 pb-3 text-[0.6rem] uppercase tracking-[0.35em] text-slate-400 sm:flex">
           {sectionProgress.map((section, index) => {
             const isActive = section.key === activeSection;
             const isCompleted =
               sectionProgress.findIndex((item) => item.key === activeSection) > index;
+            const isLast = index === sectionProgress.length - 1;
             return (
-              <div key={section.key} className="flex w-full items-center gap-3">
+              <div key={section.key} className={`flex items-center gap-3 ${isLast ? '' : 'flex-1'}`}>
                 <div
                   className={`flex h-2 w-2 items-center justify-center rounded-full border border-slate-300 transition ${
                     isActive ? 'border-ink bg-ink' : isCompleted ? 'bg-slate-300' : 'bg-transparent'
@@ -208,7 +209,7 @@ const Header = ({
                 <span className={isActive ? 'text-ink' : isCompleted ? 'text-slate-500' : ''}>
                   {section.label}
                 </span>
-                {index < sectionProgress.length - 1 && (
+                {!isLast && (
                   <div
                     className={`h-px flex-1 bg-gradient-to-r ${
                       isCompleted
