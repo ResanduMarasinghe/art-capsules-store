@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import MasonryGrid from '../components/MasonryGrid';
 import ProductCard from '../components/ProductCard';
+import CapsuleSkeleton from '../components/CapsuleSkeleton';
 import { useCart } from '../context/CartContext';
 
 const getColumnsForViewport = (width) => {
@@ -16,8 +17,8 @@ const Home = ({
   capsulesError = null,
   searchQuery,
   onSearchChange,
-  activeTag,
-  onTagChange,
+  selectedTags = [],
+  onTagToggle,
   tags = ['all'],
 }) => {
   const { addToCart } = useCart();
@@ -53,10 +54,12 @@ const Home = ({
           artist.includes(query) ||
           tagsText.includes(query)
         : true;
-      const matchesTag = activeTag === 'all' ? true : product.tags?.includes(activeTag);
+      const matchesTag = selectedTags.length
+        ? selectedTags.some((tag) => product.tags?.includes(tag))
+        : true;
       return matchesSearch && matchesTag;
     });
-  }, [searchQuery, activeTag, capsules]);
+  }, [searchQuery, selectedTags, capsules]);
 
   const masonryItems = useMemo(() => {
     return filteredProducts.map((product, index) => ({
@@ -64,6 +67,20 @@ const Home = ({
       element: <ProductCard key={product.id ?? index} product={product} onAddToCart={addToCart} />,
     }));
   }, [filteredProducts, addToCart]);
+
+  const skeletonItems = useMemo(
+    () => Array.from({ length: Math.max(4, gridCols * 2) }, (_, index) => index),
+    [gridCols]
+  );
+
+  const isTagSelected = (tag) => {
+    if (tag === 'all') return selectedTags.length === 0;
+    return selectedTags.includes(tag);
+  };
+
+  const handleTagClick = (tag) => {
+    onTagToggle?.(tag);
+  };
 
   return (
     <>
@@ -163,13 +180,13 @@ const Home = ({
                 <button
                   key={tag}
                   type="button"
-                  onClick={() => onTagChange?.(tag)}
+                  onClick={() => handleTagClick(tag)}
                   className={`flex-shrink-0 rounded-full border px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] transition ${
-                    activeTag === tag
+                    isTagSelected(tag)
                       ? 'border-ink bg-ink text-white shadow-md'
                       : 'border-slate-200 bg-white text-slate-500 hover:border-ink/50 hover:text-ink'
                   }`}
-                  aria-pressed={activeTag === tag}
+                  aria-pressed={isTagSelected(tag)}
                 >
                   {tag === 'all' ? 'All' : tag}
                 </button>
@@ -183,24 +200,56 @@ const Home = ({
               <button
                 key={tag}
                 type="button"
-                onClick={() => onTagChange?.(tag)}
+                onClick={() => handleTagClick(tag)}
                 className={`rounded-full border px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.3em] transition ${
-                  activeTag === tag
+                  isTagSelected(tag)
                     ? 'border-ink bg-ink text-white shadow-md'
                     : 'border-slate-200 bg-white text-slate-500 hover:border-ink/50 hover:text-ink'
                 }`}
-                aria-pressed={activeTag === tag}
+                aria-pressed={isTagSelected(tag)}
               >
                 {tag === 'all' ? 'All' : tag}
               </button>
             ))}
           </div>
+
+          {selectedTags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 text-xs text-slate-600">
+              <span className="uppercase tracking-[0.35em] text-[0.55rem] text-slate-400">
+                Filtering by
+              </span>
+              {selectedTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleTagClick(tag)}
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[0.65rem] uppercase tracking-[0.25em] text-ink shadow-sm border border-slate-200 hover:border-rose-200 hover:text-rose-500"
+                >
+                  {tag}
+                  <span aria-hidden="true">×</span>
+                  <span className="sr-only">Remove {tag} filter</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => handleTagClick('all')}
+                className="text-[0.6rem] uppercase tracking-[0.35em] text-slate-500 underline underline-offset-4 hover:text-ink"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
         </section>
 
         <section>
           {capsulesLoading ? (
-            <div className="glass-panel rounded-[28px] border border-slate-200/80 p-12 text-center text-slate-500">
+            <div className="glass-panel rounded-[28px] border border-slate-200/80 p-6">
               <p className="text-sm uppercase tracking-[0.35em] text-mist">Loading capsules…</p>
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {skeletonItems.map((item) => (
+                  <CapsuleSkeleton key={item} />
+                ))}
+              </div>
             </div>
           ) : capsulesError ? (
             <div className="glass-panel rounded-[28px] border border-rose-200 bg-rose-50/50 p-12 text-center text-rose-600">

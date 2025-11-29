@@ -19,7 +19,7 @@ const Storefront = () => {
   const [activePage, setActivePage] = useState('home');
   const [cartOpen, setCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTag, setActiveTag] = useState('all');
+  const [selectedTags, setSelectedTags] = useState([]);
   const [showStickyFilters, setShowStickyFilters] = useState(false);
   const [activeSection, setActiveSection] = useState('experience');
   const { capsules, loading: capsulesLoading, error: capsulesError, tags } = useCapsules();
@@ -65,6 +65,16 @@ const Storefront = () => {
     setActivePage('checkout');
   };
 
+  const handleTagToggle = (tag) => {
+    if (tag === 'all') {
+      setSelectedTags([]);
+      return;
+    }
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
+    );
+  };
+
   const isHomeView = activePage === 'home';
 
   return (
@@ -84,8 +94,8 @@ const Storefront = () => {
           capsulesError={capsulesError}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          activeTag={activeTag}
-          onTagChange={setActiveTag}
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
           tags={tags}
         />
       ) : (
