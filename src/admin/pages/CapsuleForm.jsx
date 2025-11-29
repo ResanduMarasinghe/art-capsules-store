@@ -14,6 +14,7 @@ import {
 } from '../../services/capsules';
 import ImageUploadButton from '../components/ImageUploadButton';
 import { fetchTags } from '../../services/tags';
+import CapsulePreview from '../components/CapsulePreview';
 
 const defaultStats = { views: 0, addedToCart: 0, purchases: 0 };
 
@@ -444,7 +445,7 @@ const CapsuleForm = () => {
         </p>
       </div>
 
-      {error && <p className="text-sm text-rose-500">{error}</p>}
+  {error && <p className="text-sm text-rose-500">{error}</p>}
 
       <section className="grid gap-6 md:grid-cols-2">
         <label className="space-y-2">
@@ -628,7 +629,9 @@ const CapsuleForm = () => {
         onChange={(resolutions) => setFormState((prev) => ({ ...prev, resolutions }))}
       />
 
-      <section className="flex flex-col gap-4 rounded-[28px] border border-slate-200/60 bg-white/80 p-5 shadow-inner md:flex-row md:items-center md:justify-between">
+  <CapsulePreview capsule={formState} />
+
+  <section className="flex flex-col gap-4 rounded-[28px] border border-slate-200/60 bg-white/80 p-5 shadow-inner md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-mist">Visibility</p>
           <p className="text-sm text-slate-500">

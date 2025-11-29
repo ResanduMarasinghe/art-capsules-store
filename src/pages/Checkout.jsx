@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { createOrder } from '../services/orders';
 import { recordCapsulePurchase } from '../services/capsules';
 import { downloadCapsuleBundle } from '../services/downloads';
 import { recordCollectorEmail } from '../services/collectors';
+import { calculateDiscountAmount, validatePromoCode } from '../data/promoCodes';
+
+const TAX_RATE = 0.0825;
 
 const Checkout = () => {
   const { cartItems, cartSummary, clearCart } = useCart();
@@ -13,10 +16,59 @@ const Checkout = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [formValues, setFormValues] = useState({ fullName: '', email: '' });
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoFeedback, setPromoFeedback] = useState(null);
+
+  const derivedTotals = useMemo(() => {
+    const subtotal = cartSummary.subtotal || 0;
+    const discount = appliedPromo ? calculateDiscountAmount(appliedPromo, subtotal) : 0;
+    const discountedSubtotal = Math.max(0, subtotal - discount);
+    const taxes = discountedSubtotal * TAX_RATE;
+    const total = discountedSubtotal + taxes;
+    return {
+      subtotal,
+      discount,
+      discountedSubtotal,
+      taxes,
+      total,
+    };
+  }, [appliedPromo, cartSummary.subtotal]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleApplyPromo = (event) => {
+    event.preventDefault();
+    if (!promoInput.trim()) {
+      setPromoFeedback({ type: 'error', message: 'Enter a promo code before applying.' });
+      return;
+    }
+    const result = validatePromoCode(promoInput, cartSummary.subtotal);
+    if (!result.valid) {
+      let message = 'Promo code not recognized.';
+      if (result.reason === 'expired') {
+        message = 'This promo has expired.';
+      } else if (result.reason === 'minimum' && result.promo?.minimumSubtotal) {
+        message = `Spend $${result.promo.minimumSubtotal.toFixed(2)} to use this promo.`;
+      }
+      setAppliedPromo(null);
+      setPromoFeedback({ type: 'error', message });
+      return;
+    }
+    setAppliedPromo(result.promo);
+    setPromoFeedback({
+      type: 'success',
+      message: `${result.promo.label} applied — saved $${result.discount.toFixed(2)}!`,
+    });
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput('');
+    setPromoFeedback(null);
   };
 
   const handleCheckout = async (event) => {
@@ -39,9 +91,11 @@ const Checkout = () => {
     const orderPayload = {
       customerName: formValues.fullName.trim(),
       customerEmail: normalizedEmail,
-      subtotal: cartSummary.subtotal,
-      taxes: cartSummary.taxes,
-      total: cartSummary.total,
+      subtotal: derivedTotals.discountedSubtotal,
+      taxes: derivedTotals.taxes,
+      total: derivedTotals.total,
+      discount: derivedTotals.discount,
+      promoCode: appliedPromo?.code || null,
       items: normalizedItems,
     };
 
@@ -98,17 +152,60 @@ const Checkout = () => {
           <div className="mt-8 space-y-2 border-t border-slate-200 pt-4 text-sm">
             <div className="flex justify-between text-slate-500">
               <span>Subtotal</span>
-              <span>${cartSummary.subtotal.toFixed(2)}</span>
+              <span>${derivedTotals.subtotal.toFixed(2)}</span>
             </div>
+            {appliedPromo && (
+              <div className="flex justify-between text-emerald-600">
+                <span>Promo ({appliedPromo.code})</span>
+                <span>- ${derivedTotals.discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-slate-500">
               <span>Taxes</span>
-              <span>${cartSummary.taxes.toFixed(2)}</span>
+              <span>${derivedTotals.taxes.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-lg font-semibold text-ink">
               <span>Total</span>
-              <span>${cartSummary.total.toFixed(2)}</span>
+              <span>${derivedTotals.total.toFixed(2)}</span>
             </div>
           </div>
+          <form className="mt-6 space-y-2" onSubmit={handleApplyPromo}>
+            <label className="text-xs uppercase tracking-[0.35em] text-mist">Promo Code</label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                type="text"
+                value={promoInput}
+                onChange={(event) => setPromoInput(event.target.value.toUpperCase())}
+                placeholder="ARTDROP20"
+                className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm uppercase tracking-[0.35em] outline-none transition focus:border-ink"
+              />
+              <button
+                type="submit"
+                className="rounded-full border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-ink transition hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={!cartItems.length}
+              >
+                Apply
+              </button>
+            </div>
+            {promoFeedback && (
+              <p
+                className={`text-xs ${
+                  promoFeedback.type === 'error' ? 'text-rose-500' : 'text-emerald-600'
+                }`}
+              >
+                {promoFeedback.message}
+              </p>
+            )}
+            {appliedPromo && (
+              <button
+                type="button"
+                onClick={handleRemovePromo}
+                className="text-xs uppercase tracking-[0.35em] text-slate-500 underline underline-offset-4"
+              >
+                Remove promo
+              </button>
+            )}
+          </form>
         </section>
         
         <section className="glass-panel rounded-[32px] border border-slate-200/50 p-8 shadow-frame">

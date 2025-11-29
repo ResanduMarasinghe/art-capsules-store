@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FaLock, FaXmark } from 'react-icons/fa6';
+import { FaFacebook, FaInstagram, FaLock, FaShareNodes, FaTwitter, FaXmark } from 'react-icons/fa6';
 import { recordCapsuleView } from '../services/capsules';
 
 const DetailBadge = ({ label, value }) => (
@@ -27,6 +27,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
   const resolutionEntries = product.resolutions ? Object.entries(product.resolutions) : [];
   const aspectRatioValue = product.aspectRatioValue || '1 / 1';
   const [activeImage, setActiveImage] = useState(heroImage);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Track view when modal opens
   useEffect(() => {
@@ -41,6 +42,72 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
 
   const handleThumbnailSelect = (imageUrl) => {
     setActiveImage(imageUrl);
+  };
+
+  const shareUrl = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return `https://art-capsules-store.web.app/?capsule=${product?.id || ''}`;
+    }
+    const url = new URL(window.location.href);
+    if (product?.id) {
+      url.searchParams.set('capsule', product.id);
+    }
+    return url.toString();
+  }, [product?.id]);
+
+  const shareText = useMemo(() => `Collect ${product?.title || 'this capsule'} on Frame Vist`, [
+    product?.title,
+  ]);
+
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedText = encodeURIComponent(shareText);
+
+  const shareTargets = [
+    {
+      id: 'twitter',
+      label: 'Twitter',
+      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
+      icon: <FaTwitter className="h-4 w-4" aria-hidden="true" />,
+    },
+    {
+      id: 'facebook',
+      label: 'Facebook',
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      icon: <FaFacebook className="h-4 w-4" aria-hidden="true" />,
+    },
+    {
+      id: 'instagram',
+      label: 'Instagram',
+      href: `https://www.instagram.com/?url=${encodedUrl}`,
+      icon: <FaInstagram className="h-4 w-4" aria-hidden="true" />,
+    },
+  ];
+
+  const handleNativeShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: product?.title, text: shareText, url: shareUrl });
+      } catch (shareError) {
+        console.warn('User dismissed native share', shareError);
+      }
+    } else {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+      }
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(`${shareText} — ${shareUrl}`);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch (err) {
+      console.warn('Unable to copy link', err);
+    }
   };
 
   if (typeof document === 'undefined') {
@@ -190,6 +257,43 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
               </div>
             )}
             <div className="mt-auto space-y-4">
+              <div className="space-y-3 rounded-3xl border border-slate-200/80 bg-white/80 p-4">
+                <div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-mist">
+                  <span>Share capsule</span>
+                  <span className={`text-[0.55rem] ${copiedLink ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    {copiedLink ? 'Link copied' : 'Live now'}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleNativeShare}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
+                  >
+                    <FaShareNodes className="h-3.5 w-3.5" aria-hidden="true" />
+                    Quick share
+                  </button>
+                  {shareTargets.map((target) => (
+                    <a
+                      key={target.id}
+                      href={target.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
+                    >
+                      {target.icon}
+                      {target.label}
+                    </a>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500 hover:border-ink/50 hover:text-ink"
+                  >
+                    Copy link
+                  </button>
+                </div>
+              </div>
               <p className="font-display text-3xl text-ink">
                 ${product.price}
               </p>

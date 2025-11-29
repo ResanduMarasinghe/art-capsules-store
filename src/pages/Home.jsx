@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import MasonryGrid from '../components/MasonryGrid';
 import ProductCard from '../components/ProductCard';
 import CapsuleSkeleton from '../components/CapsuleSkeleton';
+import ProductModal from '../components/ProductModal';
 import { useCart } from '../context/CartContext';
 
 const getColumnsForViewport = (width) => {
@@ -22,10 +24,13 @@ const Home = ({
   tags = ['all'],
 }) => {
   const { addToCart } = useCart();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [gridCols, setGridCols] = useState(() => {
     if (typeof window === 'undefined') return 1;
     return getColumnsForViewport(window.innerWidth);
   });
+  const [sharedCapsuleId, setSharedCapsuleId] = useState(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -72,6 +77,31 @@ const Home = ({
     () => Array.from({ length: Math.max(4, gridCols * 2) }, (_, index) => index),
     [gridCols]
   );
+
+  const sharedCapsule = useMemo(() => {
+    if (!sharedCapsuleId) return null;
+    return capsules.find((capsule) => capsule.id === sharedCapsuleId) || null;
+  }, [capsules, sharedCapsuleId]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const capsuleParam = params.get('capsule');
+    if (!capsuleParam) {
+      setSharedCapsuleId(null);
+      return;
+    }
+    setSharedCapsuleId(capsuleParam);
+  }, [location.search]);
+
+  const clearCapsuleParam = () => {
+    const params = new URLSearchParams(location.search);
+    if (params.has('capsule')) {
+      params.delete('capsule');
+      const nextSearch = params.toString();
+      navigate({ pathname: location.pathname, search: nextSearch ? `?${nextSearch}` : '' }, { replace: true });
+    }
+    setSharedCapsuleId(null);
+  };
 
   const isTagSelected = (tag) => {
     if (tag === 'all') return selectedTags.length === 0;
@@ -288,6 +318,22 @@ const Home = ({
           )}
         </section>
       </main>
+
+      {sharedCapsule && (
+        <ProductModal
+          product={sharedCapsule}
+          onClose={clearCapsuleParam}
+          onAddToCart={() => {
+            const image =
+              sharedCapsule.mainImage ||
+              sharedCapsule.image ||
+              sharedCapsule.variations?.[0] ||
+              '';
+            addToCart({ ...sharedCapsule, image });
+            clearCapsuleParam();
+          }}
+        />
+      )}
     </>
   );
 };
