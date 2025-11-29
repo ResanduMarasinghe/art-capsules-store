@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FaFacebook, FaInstagram, FaLock, FaShareNodes, FaTwitter, FaXmark } from 'react-icons/fa6';
+import { FaLock, FaShareNodes, FaWhatsapp, FaXmark } from 'react-icons/fa6';
 import { recordCapsuleView } from '../services/capsules';
+
+const hasNativeShare = () => typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+const hasClipboard = () => typeof navigator !== 'undefined' && Boolean(navigator.clipboard);
 
 const DetailBadge = ({ label, value }) => (
   <div className="rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-inner">
@@ -28,6 +31,8 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
   const aspectRatioValue = product.aspectRatioValue || '1 / 1';
   const [activeImage, setActiveImage] = useState(heroImage);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [nativeShareSupported, setNativeShareSupported] = useState(() => hasNativeShare());
+  const [clipboardSupported, setClipboardSupported] = useState(() => hasClipboard());
 
   // Track view when modal opens
   useEffect(() => {
@@ -37,6 +42,11 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
       });
     }
   }, [product?.id]);
+
+  useEffect(() => {
+    setNativeShareSupported(hasNativeShare());
+    setClipboardSupported(hasClipboard());
+  }, []);
 
   const variationSources = Array.from(new Set([heroImage, ...variations].filter(Boolean)));
 
@@ -59,27 +69,12 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
     product?.title,
   ]);
 
-  const encodedUrl = encodeURIComponent(shareUrl);
-  const encodedText = encodeURIComponent(shareText);
-
   const shareTargets = [
     {
-      id: 'twitter',
-      label: 'Twitter',
-      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
-      icon: <FaTwitter className="h-4 w-4" aria-hidden="true" />,
-    },
-    {
-      id: 'facebook',
-      label: 'Facebook',
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      icon: <FaFacebook className="h-4 w-4" aria-hidden="true" />,
-    },
-    {
-      id: 'instagram',
-      label: 'Instagram',
-      href: `https://www.instagram.com/?url=${encodedUrl}`,
-      icon: <FaInstagram className="h-4 w-4" aria-hidden="true" />,
+      id: 'whatsapp',
+      label: 'WhatsApp',
+      href: `https://wa.me/?text=${encodeURIComponent(`${shareText} — ${shareUrl}`)}`,
+      icon: <FaWhatsapp className="h-4 w-4" aria-hidden="true" />,
     },
   ];
 
@@ -102,13 +97,58 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
   const handleCopyLink = async () => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return;
     try {
-      await navigator.clipboard.writeText(`${shareText} — ${shareUrl}`);
+      await navigator.clipboard.writeText(shareUrl);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     } catch (err) {
       console.warn('Unable to copy link', err);
     }
   };
+
+  const SharePanel = ({ className = '' }) => (
+    <div className={`space-y-3 rounded-3xl border border-slate-200/80 bg-white/80 p-4 ${className}`}>
+      <div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-mist">
+        <span>Share capsule</span>
+        <span className={`text-[0.55rem] ${copiedLink ? 'text-emerald-600' : 'text-slate-400'}`}>
+          {copiedLink ? 'Link copied' : 'Live now'}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={handleNativeShare}
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
+          aria-label={nativeShareSupported ? 'Open device share sheet' : 'Copy link via quick share fallback'}
+          title={nativeShareSupported ? 'Open your device share sheet' : 'Copies the capsule link on this device'}
+        >
+          <FaShareNodes className="h-3.5 w-3.5" aria-hidden="true" />
+          {nativeShareSupported ? 'Quick share' : 'Copy link'}
+        </button>
+        {shareTargets.map((target) => (
+          <a
+            key={target.id}
+            href={target.href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
+          >
+            {target.icon}
+            {target.label}
+          </a>
+        ))}
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          className="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500 transition hover:border-ink/50 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!clipboardSupported}
+          aria-disabled={!clipboardSupported}
+          title={clipboardSupported ? 'Copy capsule link to clipboard' : 'Clipboard unavailable in this browser'}
+        >
+          Copy link
+        </button>
+      </div>
+    </div>
+  );
 
   if (typeof document === 'undefined') {
     return null;
@@ -138,18 +178,21 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white via-white/80 to-transparent sm:hidden" />
         <div className="flex h-full flex-col gap-6 overflow-y-auto p-6 pt-16 sm:gap-8 sm:p-8 sm:pt-8 md:grid md:grid-cols-[1.1fr,0.9fr]">
           <div className="md:sticky md:top-0 md:self-start md:max-h-[calc(90vh-4rem)]">
-            <figure
-              className="relative w-full flex-shrink-0 overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]"
-              style={{ aspectRatio: aspectRatioValue, minHeight: '280px' }}
-            >
-              <img
-                src={activeImage || heroImage}
-                alt={product.title}
-                className="absolute inset-0 h-full w-full object-contain transition duration-700 ease-out hover:scale-[1.03]"
-                loading="lazy"
-              />
-              <figcaption className="sr-only">{product.title}</figcaption>
-            </figure>
+            <div className="flex flex-col gap-6">
+              <figure
+                className="relative w-full flex-shrink-0 overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]"
+                style={{ aspectRatio: aspectRatioValue, minHeight: '280px' }}
+              >
+                <img
+                  src={activeImage || heroImage}
+                  alt={product.title}
+                  className="absolute inset-0 h-full w-full object-contain transition duration-700 ease-out hover:scale-[1.03]"
+                  loading="lazy"
+                />
+                <figcaption className="sr-only">{product.title}</figcaption>
+              </figure>
+              <SharePanel className="hidden md:block" />
+            </div>
           </div>
           <div className="flex flex-col gap-6">
             <div className="space-y-3">
@@ -257,43 +300,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
               </div>
             )}
             <div className="mt-auto space-y-4">
-              <div className="space-y-3 rounded-3xl border border-slate-200/80 bg-white/80 p-4">
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-mist">
-                  <span>Share capsule</span>
-                  <span className={`text-[0.55rem] ${copiedLink ? 'text-emerald-600' : 'text-slate-400'}`}>
-                    {copiedLink ? 'Link copied' : 'Live now'}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={handleNativeShare}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
-                  >
-                    <FaShareNodes className="h-3.5 w-3.5" aria-hidden="true" />
-                    Quick share
-                  </button>
-                  {shareTargets.map((target) => (
-                    <a
-                      key={target.id}
-                      href={target.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
-                    >
-                      {target.icon}
-                      {target.label}
-                    </a>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={handleCopyLink}
-                    className="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500 hover:border-ink/50 hover:text-ink"
-                  >
-                    Copy link
-                  </button>
-                </div>
-              </div>
+              <SharePanel className="md:hidden" />
               <p className="font-display text-3xl text-ink">
                 ${product.price}
               </p>
