@@ -13,6 +13,7 @@ import AdminDashboard from './admin/pages/AdminDashboard';
 import CapsulesList from './admin/pages/CapsulesList';
 import CapsuleForm from './admin/pages/CapsuleForm';
 import Analytics from './admin/pages/Analytics';
+import Promos from './admin/pages/Promos';
 import { useCapsules } from './hooks/useCapsules';
 
 const Storefront = () => {
@@ -126,6 +127,7 @@ function App() {
                 <Route path="capsules" element={<CapsulesList />} />
                 <Route path="capsules/new" element={<CapsuleForm />} />
                 <Route path="capsules/:id/edit" element={<CapsuleForm />} />
+                <Route path="promos" element={<Promos />} />
                 <Route path="analytics" element={<Analytics />} />
               </Route>
             </Route>

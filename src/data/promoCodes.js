@@ -1,38 +1,12 @@
-const promoCodes = [
-  {
-    code: 'ARTDROP20',
-    label: 'Holiday Drop — 20% off',
-    type: 'percentage',
-    value: 20,
-    expiresAt: '2025-12-31T23:59:59.000Z',
-    minimumSubtotal: 80,
-    description: 'Limited holiday pricing on orders over $80.',
-  },
-  {
-    code: 'FRAME10',
-    label: 'Studio Loyalty — $10 off',
-    type: 'flat',
-    value: 10,
-    expiresAt: '2025-06-30T23:59:59.000Z',
-    minimumSubtotal: 60,
-    description: 'Save $10 when collecting two or more capsules.',
-  },
-  {
-    code: 'COLLECT5',
-    label: 'Collector Circle — 5% off',
-    type: 'percentage',
-    value: 5,
-    expiresAt: null,
-    minimumSubtotal: 0,
-    description: 'Evergreen perk for newsletter collectors.',
-  },
-];
+export const defaultPromoCodes = [];
 
-const normalizeCode = (code = '') => code.trim().toUpperCase();
+export const normalizeCode = (code = '') => code.trim().toUpperCase();
 
-export const findPromoCode = (code = '') => {
+const resolvePromoPool = (pool) => (Array.isArray(pool) && pool.length ? pool : defaultPromoCodes);
+
+export const findPromoCode = (code = '', pool = defaultPromoCodes) => {
   const normalized = normalizeCode(code);
-  return promoCodes.find((entry) => entry.code === normalized) || null;
+  return resolvePromoPool(pool).find((entry) => entry.code === normalized) || null;
 };
 
 export const isPromoExpired = (promo) => {
@@ -50,8 +24,8 @@ export const calculateDiscountAmount = (promo, subtotal) => {
   return Math.max(0, Math.min(amount, maxDiscount, subtotal));
 };
 
-export const validatePromoCode = (code, subtotal) => {
-  const promo = findPromoCode(code);
+export const validatePromoCode = (code, subtotal, pool = defaultPromoCodes, context = {}) => {
+  const promo = findPromoCode(code, pool);
   if (!promo) {
     return { valid: false, reason: 'not-found' };
   }
@@ -64,6 +38,11 @@ export const validatePromoCode = (code, subtotal) => {
     return { valid: false, reason: 'minimum', promo };
   }
 
+  const orderTotal = typeof context.orderTotal === 'number' ? context.orderTotal : subtotal;
+  if (promo.minimumOrderTotal && orderTotal < promo.minimumOrderTotal) {
+    return { valid: false, reason: 'minimum-total', promo };
+  }
+
   const discount = calculateDiscountAmount(promo, subtotal);
   if (!discount) {
     return { valid: false, reason: 'ineligible', promo };
@@ -72,4 +51,4 @@ export const validatePromoCode = (code, subtotal) => {
   return { valid: true, promo, discount };
 };
 
-export default promoCodes;
+export default defaultPromoCodes;

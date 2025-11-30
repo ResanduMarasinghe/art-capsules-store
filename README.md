@@ -124,7 +124,19 @@ const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/YOUR_CLOUD/image/upload'
 const UPLOAD_PRESET = 'YOUR_PRESET';
 ```
 
-### **4. Run & Deploy**
+### **4. Grant Admin Access**
+Create a document at `adminSettings/core` inside Firestore with an array of allowed admin emails:
+```json
+{
+  "allowedEmails": [
+    "owner@example.com",
+    "teammate@example.com"
+  ]
+}
+```
+Any authenticated user whose email appears in that array (or who has a custom Firebase auth claim `admin=true`) can manage capsules, orders, and promo codes.
+
+### **5. Run & Deploy**
 ```bash
 npm start              # Development server (localhost:3000)
 npm run build          # Production build

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MasonryGrid from '../components/MasonryGrid';
 import ProductCard from '../components/ProductCard';
@@ -31,6 +31,15 @@ const Home = ({
     return getColumnsForViewport(window.innerWidth);
   });
   const [sharedCapsuleId, setSharedCapsuleId] = useState(null);
+  const [promoCopied, setPromoCopied] = useState(false);
+  const promoCopyTimeout = useRef(null);
+  useEffect(() => {
+    return () => {
+      if (promoCopyTimeout.current) {
+        clearTimeout(promoCopyTimeout.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -112,6 +121,22 @@ const Home = ({
     onTagToggle?.(tag);
   };
 
+  const handlePromoCopy = async () => {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText('FRAMEVIST2025');
+      setPromoCopied(true);
+      if (promoCopyTimeout.current) {
+        clearTimeout(promoCopyTimeout.current);
+      }
+      promoCopyTimeout.current = setTimeout(() => {
+        setPromoCopied(false);
+      }, 1500);
+    } catch (err) {
+      console.warn('Unable to copy FRAMEVIST2025', err);
+    }
+  };
+
   return (
     <>
       <section
@@ -139,6 +164,45 @@ const Home = ({
           >
             Explore Capsules
           </a>
+        </div>
+      </section>
+
+      <section className="mx-auto -mt-6 w-full max-w-5xl px-6 sm:-mt-10 sm:px-8 lg:-mt-14">
+        <div className="flex flex-col gap-4 rounded-[32px] border border-emerald-100 bg-white/95 px-6 py-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-1 items-center gap-4 text-left">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 font-display text-lg text-emerald-700">
+              10%
+            </span>
+            <div>
+              <p className="text-[0.6rem] uppercase tracking-[0.4em] text-emerald-500">Frame Vist perk</p>
+              <p className="font-display text-lg leading-tight text-ink sm:text-xl">
+                FRAMEVIST2025 unlocks 10% off orders $50+ (including taxes).
+              </p>
+              <p className="text-xs text-slate-500">Copy the code or jump to the catalogue to qualify.</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 md:justify-end">
+            <button
+              type="button"
+              onClick={handlePromoCopy}
+              className="flex flex-col rounded-[28px] border border-emerald-200 bg-emerald-50/80 px-4 py-2 text-left shadow-inner transition hover:border-emerald-400"
+            >
+              <span className="font-mono text-sm tracking-[0.4em] text-emerald-800">FRAMEVIST2025</span>
+              <span
+                className={`text-[0.6rem] uppercase tracking-[0.35em] ${
+                  promoCopied ? 'text-emerald-600' : 'text-slate-400'
+                }`}
+              >
+                {promoCopied ? 'Copied' : 'Tap to copy'}
+              </span>
+            </button>
+            <a
+              href="#catalogue"
+              className="inline-flex items-center justify-center rounded-full border border-emerald-300 px-6 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-emerald-700 transition hover:bg-emerald-500/10"
+            >
+              Shop capsules
+            </a>
+          </div>
         </div>
       </section>
 

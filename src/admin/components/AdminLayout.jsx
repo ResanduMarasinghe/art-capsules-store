@@ -6,6 +6,7 @@ const navItems = [
   { label: 'Dashboard', to: '/admin' },
   { label: 'Capsules', to: '/admin/capsules' },
   { label: 'Add Capsule', to: '/admin/capsules/new' },
+  { label: 'Promos', to: '/admin/promos' },
   { label: 'Analytics', to: '/admin/analytics' },
 ];
 
@@ -15,6 +16,7 @@ const getAdminPageTitle = (pathname = '') => {
   if (pathname === '/admin/capsules/new') return 'Add Capsule';
   if (pathname.startsWith('/admin/capsules/') && pathname.endsWith('/edit')) return 'Edit Capsule';
   if (pathname.startsWith('/admin/capsules')) return 'Capsules';
+  if (pathname.startsWith('/admin/promos')) return 'Promos';
   if (pathname.startsWith('/admin/analytics')) return 'Analytics';
   return 'Admin';
 };

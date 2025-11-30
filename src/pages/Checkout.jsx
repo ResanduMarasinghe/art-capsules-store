@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { createOrder } from '../services/orders';
 import { recordCapsulePurchase } from '../services/capsules';
 import { downloadCapsuleBundle } from '../services/downloads';
 import { recordCollectorEmail } from '../services/collectors';
-import { calculateDiscountAmount, validatePromoCode } from '../data/promoCodes';
+import { calculateDiscountAmount, defaultPromoCodes, validatePromoCode } from '../data/promoCodes';
+import { fetchPromos } from '../services/promos';
 
 const TAX_RATE = 0.0825;
 
@@ -19,6 +20,31 @@ const Checkout = () => {
   const [promoInput, setPromoInput] = useState('');
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [promoFeedback, setPromoFeedback] = useState(null);
+  const [promoPool, setPromoPool] = useState(defaultPromoCodes);
+  const [promoSyncing, setPromoSyncing] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadPromos = async () => {
+      setPromoSyncing(true);
+      try {
+        const remotePromos = await fetchPromos();
+        if (isMounted && Array.isArray(remotePromos) && remotePromos.length) {
+          setPromoPool(remotePromos);
+        }
+      } catch (promoError) {
+        console.warn('Unable to sync promo codes', promoError);
+      } finally {
+        if (isMounted) {
+          setPromoSyncing(false);
+        }
+      }
+    };
+    loadPromos();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const derivedTotals = useMemo(() => {
     const subtotal = cartSummary.subtotal || 0;
@@ -46,13 +72,19 @@ const Checkout = () => {
       setPromoFeedback({ type: 'error', message: 'Enter a promo code before applying.' });
       return;
     }
-    const result = validatePromoCode(promoInput, cartSummary.subtotal);
+    const subtotal = cartSummary.subtotal || 0;
+    const preDiscountTotal = subtotal + subtotal * TAX_RATE;
+    const result = validatePromoCode(promoInput, subtotal, promoPool, {
+      orderTotal: preDiscountTotal,
+    });
     if (!result.valid) {
       let message = 'Promo code not recognized.';
       if (result.reason === 'expired') {
         message = 'This promo has expired.';
       } else if (result.reason === 'minimum' && result.promo?.minimumSubtotal) {
         message = `Spend $${result.promo.minimumSubtotal.toFixed(2)} to use this promo.`;
+      } else if (result.reason === 'minimum-total' && result.promo?.minimumOrderTotal) {
+        message = `Order total must be at least $${result.promo.minimumOrderTotal.toFixed(2)} (including taxes).`;
       }
       setAppliedPromo(null);
       setPromoFeedback({ type: 'error', message });
@@ -131,7 +163,7 @@ const Checkout = () => {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
-      <div className="grid gap-10 lg:grid-cols-[0.9fr,1.1fr]">
+  <div className="grid gap-10 lg:grid-cols-[0.9fr,1.1fr]">
         <section className="glass-panel rounded-[32px] border border-slate-200/50 p-8 shadow-frame">
           <h2 className="font-display text-3xl text-ink">Order Summary</h2>
           <div className="mt-6 space-y-4">
@@ -194,6 +226,11 @@ const Checkout = () => {
                 }`}
               >
                 {promoFeedback.message}
+              </p>
+            )}
+            {promoSyncing && (
+              <p className="text-[0.6rem] uppercase tracking-[0.35em] text-slate-400">
+                Syncing latest promos…
               </p>
             )}
             {appliedPromo && (
