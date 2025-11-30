@@ -50,6 +50,28 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
 
   const variationSources = Array.from(new Set([heroImage, ...variations].filter(Boolean)));
 
+  // Keyboard navigation for variations
+  useEffect(() => {
+    if (variationSources.length <= 1) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        const currentIndex = variationSources.indexOf(activeImage || heroImage);
+        const prevIndex = currentIndex <= 0 ? variationSources.length - 1 : currentIndex - 1;
+        setActiveImage(variationSources[prevIndex]);
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        const currentIndex = variationSources.indexOf(activeImage || heroImage);
+        const nextIndex = (currentIndex + 1) % variationSources.length;
+        setActiveImage(variationSources[nextIndex]);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeImage, heroImage, variationSources]);
+
   const handleThumbnailSelect = (imageUrl) => {
     setActiveImage(imageUrl);
   };

@@ -23,7 +23,7 @@ const Home = ({
   onTagToggle,
   tags = ['all'],
 }) => {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const [gridCols, setGridCols] = useState(() => {
@@ -33,12 +33,22 @@ const Home = ({
   const [sharedCapsuleId, setSharedCapsuleId] = useState(null);
   const [promoCopied, setPromoCopied] = useState(false);
   const promoCopyTimeout = useRef(null);
+  const [scrollY, setScrollY] = useState(0);
+  
   useEffect(() => {
     return () => {
       if (promoCopyTimeout.current) {
         clearTimeout(promoCopyTimeout.current);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -75,12 +85,27 @@ const Home = ({
     });
   }, [searchQuery, selectedTags, capsules]);
 
+  const cartItemIds = useMemo(() => {
+    return new Set(
+      (cartItems || [])
+        .map((item) => item?.id)
+        .filter((id) => id !== undefined && id !== null)
+    );
+  }, [cartItems]);
+
   const masonryItems = useMemo(() => {
     return filteredProducts.map((product, index) => ({
       id: product.id ?? index,
-      element: <ProductCard key={product.id ?? index} product={product} onAddToCart={addToCart} />,
+      element: (
+        <ProductCard
+          key={product.id ?? index}
+          product={product}
+          onAddToCart={addToCart}
+          isInCart={product.id ? cartItemIds.has(product.id) : false}
+        />
+      ),
     }));
-  }, [filteredProducts, addToCart]);
+  }, [filteredProducts, addToCart, cartItemIds]);
 
   const skeletonItems = useMemo(
     () => Array.from({ length: Math.max(4, gridCols * 2) }, (_, index) => index),
@@ -144,10 +169,14 @@ const Home = ({
         className="relative isolate overflow-hidden bg-white px-4 py-20 text-center sm:px-6 md:py-32"
       >
         <div
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(0,0,0,0.08),_transparent_55%)] opacity-40"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(0,0,0,0.08),_transparent_55%)] opacity-40 transition-transform duration-75"
+          style={{ transform: `translateY(${scrollY * 0.3}px)` }}
           aria-hidden="true"
         />
-        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5 text-center sm:gap-6 lg:gap-8 animate-hero-fade-in">
+        <div 
+          className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5 text-center sm:gap-6 lg:gap-8 animate-hero-fade-in"
+          style={{ transform: `translateY(${scrollY * 0.15}px)`, opacity: Math.max(0, 1 - scrollY / 500) }}
+        >
           <p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-400 sm:text-xs">
             Frame Vist
           </p>
@@ -376,6 +405,7 @@ const Home = ({
                     key={product.id ?? index} 
                     product={product} 
                     onAddToCart={addToCart} 
+                    isInCart={product.id ? cartItemIds.has(product.id) : false}
                   />
                 ))}
               </div>

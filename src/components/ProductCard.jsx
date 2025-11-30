@@ -1,16 +1,61 @@
-import { useState } from 'react';
-import { FaEye, FaCartPlus } from 'react-icons/fa6';
+import { useEffect, useRef, useState } from 'react';
+import { FaEye, FaCartPlus, FaCheck } from 'react-icons/fa6';
 import ProductModal from './ProductModal';
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({ product, onAddToCart, isInCart = false }) => {
   const [open, setOpen] = useState(false);
+  const [hoveredImageIndex, setHoveredImageIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const hoverTimeoutRef = useRef(null);
+  
   const openModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
 
   const coverImage = product.mainImage || product.image || product.variations?.[0] || '';
+  const variations = product.variations?.filter(Boolean) || [];
+  const allImages = [coverImage, ...variations.filter(v => v !== coverImage)].filter(Boolean);
+  const hasMultipleImages = allImages.length > 1;
+
+  // Cycle through images on hover
+  const handleMouseEnter = () => {
+    if (!hasMultipleImages) return;
+    setIsHovering(true);
+    let index = 0;
+    hoverTimeoutRef.current = setInterval(() => {
+      index = (index + 1) % allImages.length;
+      setHoveredImageIndex(index);
+    }, 800);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearInterval(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setIsHovering(false);
+    setHoveredImageIndex(0);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearInterval(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const addButtonClasses = `flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40 ${
+    isInCart
+      ? 'border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+      : 'bg-ink text-white hover:bg-ink/90'
+  }`;
 
   return (
-    <article className="group glass-panel relative flex flex-col overflow-hidden rounded-[28px] border border-white/30 bg-white/70 shadow-frame transition duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-ink/10">
+    <article 
+      className="group glass-panel relative flex flex-col overflow-hidden rounded-[28px] border border-white/30 bg-white/70 shadow-frame transition duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-ink/10"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div
         className="relative w-full cursor-pointer overflow-hidden bg-slate-100"
         onClick={openModal}
@@ -26,12 +71,28 @@ const ProductCard = ({ product, onAddToCart }) => {
         aria-label={`View ${product.title}`}
       >
         <img
-          src={coverImage}
+          src={isHovering && hasMultipleImages ? allImages[hoveredImageIndex] : coverImage}
           alt={product.title}
           className="block w-full h-auto object-cover transition duration-500 group-hover:scale-105"
           loading="lazy"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent opacity-0 transition group-hover:opacity-100" />
+        
+        {/* Variation indicator dots */}
+        {hasMultipleImages && (
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            {allImages.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 w-1.5 rounded-full transition-all ${
+                  index === hoveredImageIndex
+                    ? 'bg-white w-4'
+                    : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
         <div className="space-y-1.5 sm:space-y-2">
@@ -59,15 +120,27 @@ const ProductCard = ({ product, onAddToCart }) => {
             </button>
             <button
               type="button"
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition-all hover:bg-ink/90"
+              className={addButtonClasses}
               onClick={(event) => {
                 event.preventDefault();
+                if (isInCart) return;
                 onAddToCart({ ...product, image: coverImage });
               }}
-              aria-label="Add to cart"
+              aria-label={isInCart ? 'Already in cart' : 'Add to cart'}
+              aria-disabled={isInCart}
+              disabled={isInCart}
             >
-              <FaCartPlus className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Add</span>
+              {isInCart ? (
+                <>
+                  <FaCheck className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Added</span>
+                </>
+              ) : (
+                <>
+                  <FaCartPlus className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Add</span>
+                </>
+              )}
             </button>
           </div>
         </div>
