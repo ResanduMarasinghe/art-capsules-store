@@ -134,7 +134,7 @@ const Checkout = () => {
     try {
       const newOrderId = await createOrder(orderPayload);
       await Promise.all(
-        normalizedItems.map((item) => recordCapsulePurchase(item.id, item.quantity))
+        normalizedItems.map((item) => recordCapsulePurchase(item.id, 1))
       );
       const orderWithId = { ...orderPayload, id: newOrderId };
       recordCollectorEmail({
@@ -198,11 +198,11 @@ const Checkout = () => {
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-ink">{item.title}</p>
-                      <p className="text-xs text-slate-500">Quantity: {item.quantity}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-ink truncate">{item.title}</p>
+                      <p className="text-xs text-slate-500">Digital Download</p>
                     </div>
-                    <span className="font-semibold text-ink">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-semibold text-ink">${item.price}</span>
                   </div>
                 ))
               )}
