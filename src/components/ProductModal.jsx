@@ -7,7 +7,7 @@ const hasNativeShare = () => typeof navigator !== 'undefined' && typeof navigato
 const hasClipboard = () => typeof navigator !== 'undefined' && Boolean(navigator.clipboard);
 
 const DetailBadge = ({ label, value }) => (
-  <div className="rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-inner">
+  <div className="rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-inner backdrop-blur-sm">
     <p className="text-[0.6rem] uppercase tracking-[0.4em] text-mist">{label}</p>
     <p className="mt-1 font-display text-lg text-ink">{value || '—'}</p>
   </div>
@@ -106,7 +106,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
   };
 
   const SharePanel = ({ className = '' }) => (
-    <div className={`space-y-3 rounded-3xl border border-slate-200/80 bg-white/80 p-4 ${className}`}>
+    <div className={`space-y-3 rounded-3xl border border-slate-200/80 bg-white/80 p-5 backdrop-blur-sm ${className}`}>
       <div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-mist">
         <span>Share capsule</span>
         <span className={`text-[0.55rem] ${copiedLink ? 'text-emerald-600' : 'text-slate-400'}`}>
@@ -117,7 +117,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
         <button
           type="button"
           onClick={handleNativeShare}
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 backdrop-blur-sm transition hover:border-ink hover:bg-white hover:text-ink"
           aria-label={nativeShareSupported ? 'Open device share sheet' : 'Copy link via quick share fallback'}
           title={nativeShareSupported ? 'Open your device share sheet' : 'Copies the capsule link on this device'}
         >
@@ -130,7 +130,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
             href={target.href}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 transition hover:border-ink hover:text-ink"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-600 backdrop-blur-sm transition hover:border-ink hover:bg-white hover:text-ink"
           >
             {target.icon}
             {target.label}
@@ -139,7 +139,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
         <button
           type="button"
           onClick={handleCopyLink}
-          className="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500 transition hover:border-ink/50 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 bg-white/80 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500 backdrop-blur-sm transition hover:border-ink/50 hover:bg-white hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
           disabled={!clipboardSupported}
           aria-disabled={!clipboardSupported}
           title={clipboardSupported ? 'Copy capsule link to clipboard' : 'Clipboard unavailable in this browser'}
@@ -170,7 +170,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
         <button
           type="button"
           aria-label="Close capsule view"
-          className="absolute right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-ink/80 text-white shadow-lg shadow-ink/30 backdrop-blur-sm transition hover:bg-ink sm:right-6 sm:top-6"
+          className="absolute right-4 top-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-white/60 bg-ink/80 text-white shadow-lg shadow-ink/30 backdrop-blur-sm transition-all hover:scale-110 hover:bg-ink sm:right-6 sm:top-6"
           onClick={onClose}
         >
           <FaXmark className="h-4 w-4" />
@@ -180,13 +180,13 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
           <div className="md:sticky md:top-0 md:self-start md:max-h-[calc(90vh-4rem)]">
             <div className="flex flex-col gap-6">
               <figure
-                className="relative w-full flex-shrink-0 overflow-hidden rounded-[24px] bg-slate-100 shadow-inner md:rounded-[32px]"
+                className="relative w-full flex-shrink-0 overflow-hidden rounded-[28px] bg-slate-100 shadow-lg md:rounded-[32px]"
                 style={{ aspectRatio: aspectRatioValue, minHeight: '280px' }}
               >
                 <img
                   src={activeImage || heroImage}
                   alt={product.title}
-                  className="absolute inset-0 h-full w-full object-contain transition duration-700 ease-out hover:scale-[1.03]"
+                  className="absolute inset-0 h-full w-full object-contain transition duration-700 ease-out hover:scale-105"
                   loading="lazy"
                 />
                 <figcaption className="sr-only">{product.title}</figcaption>
@@ -195,27 +195,49 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
             </div>
           </div>
           <div className="flex flex-col gap-6">
-            <div className="space-y-3">
+            <div className="space-y-4">
               <p className="text-xs uppercase tracking-[0.4em] text-mist">{product.artist}</p>
-              <h3 className="font-display text-4xl leading-tight text-ink">{product.title}</h3>
+              <h3 className="font-display text-5xl leading-[1.1] text-ink">{product.title}</h3>
               <p className="text-base leading-relaxed text-slate-600">{product.description}</p>
-              <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200/70 bg-white/80 px-4 py-1 text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">
-                <span>Model</span>
-                <span className="font-semibold text-ink/80">{product.model || 'Not specified'}</span>
+              {product.model && (
+                <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200/70 bg-white/80 px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">
+                  <span>Model</span>
+                  <span className="font-semibold text-ink/80">{product.model}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Price and CTA - Moved to top for visibility */}
+            <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-sm">
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs uppercase tracking-[0.4em] text-mist">Price</span>
+                <p className="font-display text-4xl text-ink">
+                  ${product.price}
+                </p>
               </div>
+              <button
+                type="button"
+                className="group relative w-full overflow-hidden rounded-full bg-ink px-6 py-4 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
+                onClick={onAddToCart}
+              >
+                Add to Cart
+              </button>
+              <p className="text-center text-xs uppercase tracking-[0.35em] text-mist">
+                Collector proof · Limited digital edition
+              </p>
             </div>
             {product.prompt && (
-              <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-br from-white/95 via-white/80 to-slate-50/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+              <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-br from-white/95 via-white/80 to-slate-50/60 p-5 shadow-sm">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink text-white shadow-lg shadow-ink/30">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-ink text-white shadow-lg shadow-ink/30">
                     <FaLock className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div className="flex-1 space-y-3">
                     <div>
                       <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist">Creator Prompt</p>
-                      <p className="text-xs text-slate-400">Locked until purchase</p>
+                      <p className="text-xs text-slate-400">Unlocks after purchase</p>
                     </div>
-                    <p className="relative rounded-2xl border border-dashed border-slate-200/80 bg-white/70 p-3 text-sm text-slate-500">
+                    <p className="relative rounded-2xl border border-dashed border-slate-200/80 bg-white/70 p-4 text-sm leading-relaxed text-slate-500">
                       <span className="block select-none text-slate-500/80 blur-sm">
                         {product.prompt}
                       </span>
@@ -282,15 +304,15 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
                         type="button"
                         key={imageUrl}
                         onClick={() => handleThumbnailSelect(imageUrl)}
-                        className={`flex-shrink-0 rounded-2xl border-2 p-1 transition hover:border-ink/40 ${
-                          isActive ? 'border-ink bg-ink/5' : 'border-transparent bg-white/70'
+                        className={`flex-shrink-0 rounded-2xl border-2 p-1.5 transition-all hover:scale-105 ${
+                          isActive ? 'border-ink bg-ink/5 shadow-md' : 'border-transparent bg-white/70 hover:border-slate-200'
                         }`}
                         aria-label={`View alternate angle of ${product.title}`}
                       >
                         <img
                           src={imageUrl}
                           alt={`${product.title} preview`}
-                          className="h-24 w-24 rounded-xl object-cover shadow-md"
+                          className="h-24 w-24 rounded-xl object-cover shadow-sm"
                           loading="lazy"
                         />
                       </button>
@@ -299,22 +321,9 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
                 </div>
               </div>
             )}
-            <div className="mt-auto space-y-4">
-              <SharePanel className="md:hidden" />
-              <p className="font-display text-3xl text-ink">
-                ${product.price}
-              </p>
-              <button
-                type="button"
-                className="w-full rounded-full bg-ink px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-ink/90"
-                onClick={onAddToCart}
-              >
-                Add to Cart
-              </button>
-              <p className="text-center text-xs uppercase tracking-[0.35em] text-mist">
-                Collector proof · Limited digital edition
-              </p>
-            </div>
+            
+            {/* Share panel at bottom */}
+            <SharePanel className="md:hidden" />
           </div>
         </div>
       </div>
