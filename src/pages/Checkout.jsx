@@ -162,54 +162,54 @@ const Checkout = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-pearl via-white to-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-br from-pearl via-white to-slate-50 px-3 py-12 sm:px-6 sm:py-16 lg:px-8">
       <div className="mx-auto max-w-6xl">
         {/* Page Header */}
-        <div className="mb-12 text-center">
+        <div className="mb-8 text-center sm:mb-12">
           <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Secure Checkout</p>
-          <h1 className="mt-2 font-display text-4xl text-ink sm:text-5xl">Complete Your Order</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600">
+          <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl lg:text-5xl">Complete Your Order</h1>
+          <p className="mx-auto mt-4 max-w-2xl px-4 text-sm text-slate-600 sm:px-0">
             Finalize your Frame Vist collection with our secure, encrypted checkout process.
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr,1.2fr]">
+        <div className="grid gap-6 lg:grid-cols-[1fr,1.2fr] lg:gap-8">
           {/* Order Summary Card */}
-          <section className="rounded-[32px] border border-slate-200/60 bg-white/90 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+          <section className="rounded-3xl border border-slate-200/60 bg-white/90 p-5 shadow-xl backdrop-blur-sm sm:rounded-[32px] sm:p-6 lg:p-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <h2 className="font-display text-2xl text-ink">Order Summary</h2>
+              <h2 className="font-display text-xl text-ink sm:text-2xl">Order Summary</h2>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                 {cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}
               </span>
             </div>
             
-            <div className="mt-6 space-y-4">
+            <div className="mt-5 space-y-3 sm:mt-6 sm:space-y-4">
               {cartItems.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
                   <p className="text-sm text-slate-500">No capsules in your cart yet.</p>
                 </div>
               ) : (
                 cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-slate-200">
+                  <div key={item.id} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 sm:gap-4 sm:p-4">
+                    <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-slate-200 sm:h-16 sm:w-16">
                       <img 
                         src={item.image || item.mainImage || item.variations?.[0] || ''} 
                         alt={item.title}
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-ink truncate">{item.title}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-ink sm:text-base">{item.title}</p>
                       <p className="text-xs text-slate-500">Digital Download</p>
                     </div>
-                    <span className="font-semibold text-ink">${item.price}</span>
+                    <span className="flex-shrink-0 text-sm font-semibold text-ink sm:text-base">${item.price}</span>
                   </div>
                 ))
               )}
             </div>
 
             {/* Pricing Breakdown */}
-            <div className="mt-8 space-y-3 rounded-2xl bg-slate-50/80 p-6">
+            <div className="mt-6 space-y-2.5 rounded-2xl bg-slate-50/80 p-5 sm:mt-8 sm:space-y-3 sm:p-6">
               <div className="flex justify-between text-sm text-slate-600">
                 <span>Subtotal</span>
                 <span className="font-medium">${derivedTotals.subtotal.toFixed(2)}</span>
@@ -224,14 +224,14 @@ const Checkout = () => {
                 <span>Taxes (8.25%)</span>
                 <span className="font-medium">${derivedTotals.taxes.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between border-t border-slate-200 pt-3 text-xl font-bold text-ink">
+              <div className="flex justify-between border-t border-slate-200 pt-2.5 text-lg font-bold text-ink sm:pt-3 sm:text-xl">
                 <span>Total</span>
                 <span>${derivedTotals.total.toFixed(2)}</span>
               </div>
             </div>
 
             {/* Promo Code Section */}
-            <form className="mt-6 space-y-3" onSubmit={handleApplyPromo}>
+            <form className="mt-5 space-y-3 sm:mt-6" onSubmit={handleApplyPromo}>
               <label className="block text-xs font-semibold uppercase tracking-[0.35em] text-slate-600">
                 Promo Code
               </label>
@@ -245,7 +245,7 @@ const Checkout = () => {
                 />
                 <button
                   type="submit"
-                  className="rounded-xl bg-emerald-500 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl bg-emerald-500 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
                   disabled={!cartItems.length}
                 >
                   Apply
@@ -272,31 +272,31 @@ const Checkout = () => {
           </section>
         
           {/* Checkout Form Card */}
-          <section className="rounded-[32px] border border-slate-200/60 bg-white/90 p-6 shadow-xl backdrop-blur-sm sm:p-8">
-            <h2 className="font-display text-2xl text-ink">
+          <section className="rounded-3xl border border-slate-200/60 bg-white/90 p-5 shadow-xl backdrop-blur-sm sm:rounded-[32px] sm:p-6 lg:p-8">
+            <h2 className="font-display text-xl text-ink sm:text-2xl">
               {orderComplete ? '✓ Order Complete' : 'Payment Details'}
             </h2>
             {orderComplete ? (
-              <div className="mt-8 space-y-6">
-                <div className="rounded-2xl bg-emerald-50 p-6">
-                  <p className="text-xs uppercase tracking-[0.4em] text-emerald-600 font-semibold">
+              <div className="mt-6 space-y-5 sm:mt-8 sm:space-y-6">
+                <div className="rounded-2xl bg-emerald-50 p-5 sm:p-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-600">
                     Confirmation
                   </p>
-                  <p className="mt-2 text-2xl font-bold text-ink">
+                  <p className="mt-2 text-xl font-bold text-ink sm:text-2xl">
                     Order #{orderId}
                   </p>
                   <p className="mt-3 text-sm text-slate-600">
                     Your capsules are secured and ready for download. We've saved {confirmedEmail || 'your email'} for future updates.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 sm:p-6">
                   <p className="text-sm text-slate-600">
                     Your download should begin automatically. Check your email for order details and access links.
                   </p>
                 </div>
               </div>
             ) : (
-              <form className="mt-6 space-y-6" onSubmit={handleCheckout}>
+              <form className="mt-5 space-y-5 sm:mt-6 sm:space-y-6" onSubmit={handleCheckout}>
                 {error && (
                   <div className="rounded-xl bg-rose-50 border border-rose-200 p-4">
                     <p className="text-sm font-medium text-rose-600">{error}</p>
