@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { FaXmark } from 'react-icons/fa6';
 import { useCart } from '../context/CartContext';
 
-const CartDrawer = ({ open, onClose, onCheckout }) => {
+const CartDrawer = ({ open, onClose, onCheckout, onContinueExploring }) => {
   const { cartItems, cartSummary, updateQuantity, removeFromCart } = useCart();
 
   useEffect(() => {
@@ -153,7 +153,10 @@ const CartDrawer = ({ open, onClose, onCheckout }) => {
               <button
                 type="button"
                 className="w-full rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-ink transition hover:border-ink/50"
-                onClick={onClose}
+                onClick={() => {
+                  onContinueExploring?.();
+                  onClose?.();
+                }}
               >
                 Continue Exploring
               </button>

@@ -15,8 +15,10 @@ const navLinks = [
 
 const Header = ({
   onOpenCart,
+  onNavigateHome,
   showFilters = false,
   showProgress = true,
+  isHomeView = true,
   activeSection = 'experience',
   searchQuery,
   onSearchChange,
@@ -27,6 +29,12 @@ const Header = ({
     () => `${cartSummary.count} item${cartSummary.count === 1 ? '' : 's'}`,
     [cartSummary.count]
   );
+  const handleLogoClick = () => {
+    onNavigateHome?.();
+    if (isHomeView) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/20 bg-white/85 backdrop-blur-xl">
@@ -59,9 +67,13 @@ const Header = ({
               />
             </div>
           </button>
-          <a href="#top" className="flex-shrink-0 font-display text-xl tracking-[0.3em] text-ink">
+          <button
+            type="button"
+            onClick={handleLogoClick}
+            className="flex-shrink-0 font-display text-xl tracking-[0.3em] text-ink"
+          >
             Frame Vist
-          </a>
+          </button>
         </div>
         <div className="hidden flex-1 items-center justify-center sm:flex">
           {showFilters ? (

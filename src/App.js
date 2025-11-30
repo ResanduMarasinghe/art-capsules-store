@@ -66,6 +66,11 @@ const Storefront = () => {
     setActivePage('checkout');
   };
 
+  const returnToHome = () => {
+    setActivePage('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleTagToggle = (tag) => {
     if (tag === 'all') {
       setSelectedTags([]);
@@ -82,8 +87,10 @@ const Storefront = () => {
     <div className="min-h-screen bg-pearl">
       <Header
         onOpenCart={() => setCartOpen(true)}
+        onNavigateHome={returnToHome}
         showFilters={isHomeView && showStickyFilters}
         showProgress={isHomeView}
+        isHomeView={isHomeView}
         activeSection={activeSection}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -109,6 +116,7 @@ const Storefront = () => {
         onCheckout={() => {
           goToCheckout();
         }}
+        onContinueExploring={returnToHome}
       />
     </div>
   );

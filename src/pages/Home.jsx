@@ -167,41 +167,49 @@ const Home = ({
         </div>
       </section>
 
-      <section className="mx-auto -mt-6 w-full max-w-5xl px-6 sm:-mt-10 sm:px-8 lg:-mt-14">
-        <div className="flex flex-col gap-4 rounded-[32px] border border-emerald-100 bg-white/95 px-6 py-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-1 items-center gap-4 text-left">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 font-display text-lg text-emerald-700">
-              10%
-            </span>
-            <div>
-              <p className="text-[0.6rem] uppercase tracking-[0.4em] text-emerald-500">Frame Vist perk</p>
-              <p className="font-display text-lg leading-tight text-ink sm:text-xl">
-                FRAMEVIST2025 unlocks 10% off orders $50+ (including taxes).
-              </p>
-              <p className="text-xs text-slate-500">Copy the code or jump to the catalogue to qualify.</p>
+      {/* Promo Banner - Clean section with compact mobile design */}
+      <section className="mx-auto mt-12 mb-8 w-full max-w-6xl px-4 sm:px-8">
+        <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-5 sm:p-8 shadow-xl">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-6">
+            {/* Mobile: Compact horizontal layout */}
+            <div className="flex items-center gap-3 sm:gap-5 text-left w-full lg:w-auto">
+              <div className="flex-shrink-0">
+                <div className="inline-flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-2xl sm:rounded-3xl bg-emerald-500 font-display text-xl sm:text-3xl text-white shadow-lg">
+                  10%
+                </div>
+              </div>
+              <div className="space-y-1 sm:space-y-2 flex-1">
+                <p className="text-[0.6rem] sm:text-sm uppercase tracking-[0.3em] sm:tracking-[0.35em] text-emerald-600 font-semibold">
+                  Limited Time Offer
+                </p>
+                <h2 className="font-display text-lg sm:text-2xl lg:text-3xl text-ink leading-tight">
+                  Get 10% off orders over $50
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 hidden sm:block max-w-lg">
+                  Use code <span className="font-mono bg-emerald-100 text-emerald-700 px-2 py-1 rounded font-semibold">FRAMEVIST2025</span> at checkout. Discount applies to order total including taxes.
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 md:justify-end">
-            <button
-              type="button"
-              onClick={handlePromoCopy}
-              className="flex flex-col rounded-[28px] border border-emerald-200 bg-emerald-50/80 px-4 py-2 text-left shadow-inner transition hover:border-emerald-400"
-            >
-              <span className="font-mono text-sm tracking-[0.4em] text-emerald-800">FRAMEVIST2025</span>
-              <span
-                className={`text-[0.6rem] uppercase tracking-[0.35em] ${
-                  promoCopied ? 'text-emerald-600' : 'text-slate-400'
-                }`}
+            
+            {/* Mobile: Compact stacked buttons */}
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-2 sm:gap-3 w-full lg:w-auto lg:flex-shrink-0">
+              <button
+                type="button"
+                onClick={handlePromoCopy}
+                className="flex items-center justify-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border-2 border-emerald-400 bg-white px-4 py-3 sm:px-6 sm:py-4 font-mono text-sm sm:text-lg tracking-wider text-emerald-700 shadow-md transition hover:bg-emerald-50 hover:border-emerald-500"
               >
-                {promoCopied ? 'Copied' : 'Tap to copy'}
-              </span>
-            </button>
-            <a
-              href="#catalogue"
-              className="inline-flex items-center justify-center rounded-full border border-emerald-300 px-6 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-emerald-700 transition hover:bg-emerald-500/10"
-            >
-              Shop capsules
-            </a>
+                <span className="font-bold">FRAMEVIST2025</span>
+                <span className={`text-[0.65rem] sm:text-xs uppercase ${promoCopied ? 'text-emerald-600' : 'text-slate-400'}`}>
+                  {promoCopied ? '✓ Copied' : 'Copy'}
+                </span>
+              </button>
+              <a
+                href="#catalogue"
+                className="inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-emerald-500 px-4 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-lg transition hover:bg-emerald-600"
+              >
+                Shop Now →
+              </a>
+            </div>
           </div>
         </div>
       </section>

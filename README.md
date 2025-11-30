@@ -22,6 +22,7 @@ This project demonstrates modern full-stack development with React, Firebase, an
 ## ✨ Key Features
 
 ### 🛍️ **Customer Storefront**
+
 - **Responsive Masonry Grid** — CSS columns layout with dynamic product cards
 - **Smart Search & Filtering** — Real-time search across titles, artists, and tags
 - **Product Modals** — Full-screen view with image gallery and metadata
@@ -30,6 +31,7 @@ This project demonstrates modern full-stack development with React, Firebase, an
 - **Mobile Optimized** — Touch-friendly UI with safe area insets
 
 ### 🎨 **Admin Portal**
+
 - **Authentication** — Firebase email/password login with protected routes
 - **Capsule Management** — Full CRUD operations with rich form interface
 - **Cloudinary Integration** — Direct image uploads (no Firebase Storage)
@@ -39,6 +41,7 @@ This project demonstrates modern full-stack development with React, Firebase, an
 - **Mobile Responsive** — Card-based layouts for small screens
 
 ### 📊 **Analytics Dashboard**
+
 - Revenue trends with area charts (7/30/90 days + all-time)
 - Conversion funnel (View → Cart → Purchase)
 - Top-performing products and tags
@@ -50,6 +53,7 @@ This project demonstrates modern full-stack development with React, Firebase, an
 ## 🛠️ Technologies Used
 
 ### **Frontend**
+
 - **React 19.2.0** — Modern UI framework with hooks
 - **React Router 7.1.1** — Client-side routing
 - **Tailwind CSS 3.4.17** — Utility-first styling
@@ -58,6 +62,7 @@ This project demonstrates modern full-stack development with React, Firebase, an
 - **FileSaver 2.0.5** — File download handling
 
 ### **Backend & Services**
+
 - **Firebase 12.6.0**
   - **Firestore** — NoSQL database
   - **Firebase Auth** — Admin authentication
@@ -65,6 +70,7 @@ This project demonstrates modern full-stack development with React, Firebase, an
 - **Cloudinary** — Image hosting CDN
 
 ### **Development**
+
 - **Create React App** — Build tooling
 - **PostCSS** — CSS processing
 - **ESLint** — Code quality
@@ -92,6 +98,7 @@ src/
 ## 🚀 Installation & Setup
 
 ### **1. Clone Repository**
+
 ```bash
 git clone https://github.com/ResanduMarasinghe/art-capsules-store.git
 cd art-capsules-store
@@ -99,11 +106,13 @@ npm install
 ```
 
 ### **2. Firebase Configuration**
+
 Create `src/firebase.js`:
+
 ```javascript
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -118,25 +127,29 @@ export const auth = getAuth(app);
 ```
 
 ### **3. Cloudinary Setup**
+
 Update `src/services/uploads.js`:
+
 ```javascript
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/YOUR_CLOUD/image/upload';
-const UPLOAD_PRESET = 'YOUR_PRESET';
+const CLOUDINARY_URL =
+  "https://api.cloudinary.com/v1_1/YOUR_CLOUD/image/upload";
+const UPLOAD_PRESET = "YOUR_PRESET";
 ```
 
 ### **4. Grant Admin Access**
+
 Create a document at `adminSettings/core` inside Firestore with an array of allowed admin emails:
+
 ```json
 {
-  "allowedEmails": [
-    "owner@example.com",
-    "teammate@example.com"
-  ]
+  "allowedEmails": ["owner@example.com", "teammate@example.com"]
 }
 ```
+
 Any authenticated user whose email appears in that array (or who has a custom Firebase auth claim `admin=true`) can manage capsules, orders, and promo codes.
 
 ### **5. Run & Deploy**
+
 ```bash
 npm start              # Development server (localhost:3000)
 npm run build          # Production build
@@ -148,25 +161,28 @@ firebase deploy        # Deploy to Firebase Hosting
 ## 🎯 Core Functionality
 
 ### **E-Commerce Features**
+
 ✅ Product catalogue with search/filtering  
 ✅ Shopping cart with quantity management  
 ✅ Checkout with email collection  
 ✅ Instant ZIP download delivery  
-✅ Mobile-responsive design  
+✅ Mobile-responsive design
 
 ### **Admin Features**
+
 ✅ Secure authentication  
 ✅ Product CRUD operations  
 ✅ Image upload management  
 ✅ Order & customer tracking  
-✅ Real-time analytics  
+✅ Real-time analytics
 
 ### **Tracking & Analytics**
+
 ✅ View tracking (modal opens)  
 ✅ Cart tracking (add to cart)  
 ✅ Purchase tracking (checkout)  
 ✅ Revenue calculations  
-✅ Conversion metrics  
+✅ Conversion metrics
 
 ---
 
@@ -175,6 +191,7 @@ firebase deploy        # Deploy to Firebase Hosting
 ### **Firestore Collections**
 
 **`capsules`** — Products
+
 ```javascript
 {
   id: "cap_0001",
@@ -188,6 +205,7 @@ firebase deploy        # Deploy to Firebase Hosting
 ```
 
 **`orders`** — Purchases
+
 ```javascript
 {
   id, customerName, customerEmail,
@@ -214,6 +232,7 @@ firebase deploy        # Deploy to Firebase Hosting
 ---
 
 ## 📚 Open-Source Libraries Used
+
 - React (MIT), Tailwind CSS (MIT), Firebase (Apache 2.0)
 - Recharts (MIT), JSZip (MIT/GPL), React Icons (MIT)
 - All properly cited in `package.json`
@@ -230,6 +249,7 @@ firebase deploy        # Deploy to Firebase Hosting
 ## 🔒 Security
 
 Firestore security rules allow:
+
 - Public read for published capsules
 - Public write for orders/emails (checkout)
 - Admin-only write for capsules/tags
@@ -251,7 +271,7 @@ Firestore security rules allow:
 ## 👨‍💻 Developer
 
 **Resandu Marasinghe**  
-Student Developer 
+Student Developer
 
 Built with React, Firebase, and modern web technologies.
 
