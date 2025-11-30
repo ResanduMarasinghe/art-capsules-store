@@ -30,12 +30,37 @@ Art Capsules Store is a modern digital art marketplace and admin dashboard built
 
 ## Screenshots & Visuals
 
-- ![Storefront Grid & Hero](PLACEHOLDER_storefront_grid.png)
-- ![Capsule Detail Modal](PLACEHOLDER_capsule_modal.png)
-- ![Cart Drawer & Checkout](PLACEHOLDER_cart_checkout.png)
-- ![Admin Dashboard](PLACEHOLDER_admin_dashboard.png)
-- ![Capsule Editor](PLACEHOLDER_capsule_editor.png)
-- ![Firestore Database](PLACEHOLDER_firestore_db.png)
+<div align="center">
+      <img src="docs/screenshots/hero_section.png" alt="Hero Section" width="600" />
+   <br><sub><b>Hero Section</b> — Modern, welcoming entry point for users</sub>
+   <br><br>
+      <img src="docs/screenshots/bento_grid.png" alt="Storefront Grid" width="600" />
+   <br><sub><b>Storefront Grid</b> — Responsive bento and masonry layout for browsing capsules</sub>
+   <br><br>
+      <img src="docs/screenshots/product_modal_1.png" alt="Capsule Detail Modal 1" width="600" />
+   <br><sub><b>Capsule Detail Modal</b> — Quick preview with image carousel and details</sub>
+   <br><br>
+      <img src="docs/screenshots/product_modal_2.png" alt="Capsule Detail Modal 2" width="600" />
+   <br><sub><b>Capsule Detail Modal (Alt)</b> — Keyboard navigation and variant preview</sub>
+   <br><br>
+      <img src="docs/screenshots/checkout.png" alt="Checkout Process" width="600" />
+   <br><sub><b>Checkout Process</b> — Promo codes, and secure checkout</sub>
+   <br><br>
+      <img src="docs/screenshots/admin_dashboard.png" alt="Admin Dashboard" width="600" />
+   <br><sub><b>Admin Dashboard</b> — Overview of sales, analytics and collector activity</sub>
+   <br><br>
+      <img src="docs/screenshots/admin_capsules.png" alt="Capsules as Admin" width="600" />
+   <br><sub><b>Capsule Management</b> — Add, edit, preview, and delete capsules</sub>
+   <br><br>
+      <img src="docs/screenshots/admin_analytics_1.png" alt="Admin Analytics 1" width="600" />
+   <br><sub><b>Admin Analytics</b> — Real-time analytics and order tracking</sub>
+   <br><br>
+      <img src="docs/screenshots/admin_analytics_2.png" alt="Admin Analytics 2" width="600" />
+   <br><sub><b>Admin Analytics (Alt)</b> — Tag management</sub>
+   <br><br>
+      <img src="docs/screenshots/firestore.png" alt="Firestore Database" width="600" />
+   <br><sub><b>Firestore Database</b> — Capsules, orders, and users stored in Firestore</sub>
+</div>
 
 ---
 
@@ -43,6 +68,7 @@ Art Capsules Store is a modern digital art marketplace and admin dashboard built
 
 - **Frontend:** React, Tailwind CSS
 - **Backend:** Firebase, Firestore
+- **Image Hosting:** Cloudinary
 - **Authentication:** Firebase Auth
 - **Deployment:** Firebase Hosting
 
