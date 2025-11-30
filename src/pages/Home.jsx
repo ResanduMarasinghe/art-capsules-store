@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MasonryGrid from '../components/MasonryGrid';
+import BatikBackground from '../components/BatikBackground';
 import ProductCard from '../components/ProductCard';
 import CapsuleSkeleton from '../components/CapsuleSkeleton';
 import ProductModal from '../components/ProductModal';
@@ -390,11 +391,12 @@ const Home = ({
           ) : filteredProducts.length ? (
             <>
               {/* Desktop Masonry Grid */}
-              <div className="hidden md:block">
+              <div className="hidden md:block relative w-full" style={{minHeight: '600px'}}>
                 <MasonryGrid
                   items={masonryItems}
                   columns={Math.max(2, gridCols)}
                   className="w-full"
+                  style={{position: 'relative', zIndex: 1}}
                 />
               </div>
               

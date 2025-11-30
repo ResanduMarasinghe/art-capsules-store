@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
+import PageBackground from './components/PageBackground';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Checkout from './pages/Checkout';
@@ -17,6 +18,18 @@ import Promos from './admin/pages/Promos';
 import { useCapsules } from './hooks/useCapsules';
 
 const Storefront = () => {
+  const [mainHeight, setMainHeight] = useState(window.innerHeight);
+  const mainRef = useRef(null);
+  useLayoutEffect(() => {
+    function updateHeight() {
+      if (mainRef.current) {
+        setMainHeight(mainRef.current.offsetHeight);
+      }
+    }
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
   const [activePage, setActivePage] = useState('home');
   const [cartOpen, setCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,6 +37,18 @@ const Storefront = () => {
   const [showStickyFilters, setShowStickyFilters] = useState(false);
   const [activeSection, setActiveSection] = useState('experience');
   const { capsules, loading: capsulesLoading, error: capsulesError, tags } = useCapsules();
+
+  // Batik pattern height logic
+  useLayoutEffect(() => {
+    function updateHeight() {
+      if (mainRef.current) {
+        setMainHeight(mainRef.current.offsetHeight);
+      }
+    }
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   useEffect(() => {
     document.title =
@@ -84,41 +109,44 @@ const Storefront = () => {
   const isHomeView = activePage === 'home';
 
   return (
-    <div className="min-h-screen bg-pearl">
-      <Header
-        onOpenCart={() => setCartOpen(true)}
-        onNavigateHome={returnToHome}
-        showFilters={isHomeView && showStickyFilters}
-        showProgress={isHomeView}
-        isHomeView={isHomeView}
-        activeSection={activeSection}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-      {isHomeView ? (
-        <Home
-          capsules={capsules}
-          capsulesLoading={capsulesLoading}
-          capsulesError={capsulesError}
+    <>
+      <div className="min-h-screen bg-pearl" style={{position: 'relative'}} ref={mainRef}>
+        <PageBackground height={mainHeight} />
+        <Header
+          onOpenCart={() => setCartOpen(true)}
+          onNavigateHome={returnToHome}
+          showFilters={isHomeView && showStickyFilters}
+          showProgress={isHomeView}
+          isHomeView={isHomeView}
+          activeSection={activeSection}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          selectedTags={selectedTags}
-          onTagToggle={handleTagToggle}
-          tags={tags}
         />
-      ) : (
-        <Checkout />
-      )}
+        {isHomeView ? (
+          <Home
+            capsules={capsules}
+            capsulesLoading={capsulesLoading}
+            capsulesError={capsulesError}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+            tags={tags}
+          />
+        ) : (
+          <Checkout />
+        )}
+        <CartDrawer
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          onCheckout={() => {
+            goToCheckout();
+          }}
+          onContinueExploring={returnToHome}
+        />
+      </div>
       <Footer />
-      <CartDrawer
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-        onCheckout={() => {
-          goToCheckout();
-        }}
-        onContinueExploring={returnToHome}
-      />
-    </div>
+    </>
   );
 };
 
