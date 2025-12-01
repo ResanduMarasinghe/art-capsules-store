@@ -28,6 +28,13 @@ Art Capsules Store is a modern digital art marketplace and admin dashboard built
 
 ---
 
+## Live Demo
+
+- Storefront: [art-capsules-store.web.app](https://art-capsules-store.web.app/)
+- Admin Dashboard: [art-capsules-store.web.app/admin](https://art-capsules-store.web.app/admin) _(requires admin credentials)_
+
+---
+
 ## Screenshots & Visuals
 
 <div align="center">
