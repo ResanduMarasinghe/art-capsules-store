@@ -370,7 +370,8 @@ const Checkout = () => {
                     </label>
                     <input
                       inputMode="numeric"
-                      pattern="[0-9]{3,4}"
+                      maxLength={3}
+                      pattern="[0-9]{3}"
                       placeholder="123"
                       className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 font-mono text-ink outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
                       required
