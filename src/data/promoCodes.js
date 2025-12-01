@@ -6,7 +6,10 @@ const resolvePromoPool = (pool) => (Array.isArray(pool) && pool.length ? pool : 
 
 export const findPromoCode = (code = '', pool = defaultPromoCodes) => {
   const normalized = normalizeCode(code);
-  return resolvePromoPool(pool).find((entry) => entry.code === normalized) || null;
+  return (
+    resolvePromoPool(pool).find((entry) => normalizeCode(entry.code) === normalized) ||
+    null
+  );
 };
 
 export const isPromoExpired = (promo) => {

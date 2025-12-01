@@ -30,7 +30,7 @@ const mapPromoSnapshot = (snapshot) =>
     return {
       id: docSnap.id,
       ...data,
-      code: data.code || docSnap.id,
+      code: normalizeCode(data.code || docSnap.id),
       minimumSubtotal: Number(data.minimumSubtotal ?? 0),
       minimumOrderTotal:
         data.minimumOrderTotal !== undefined && data.minimumOrderTotal !== null

@@ -4,7 +4,7 @@ import { createOrder } from '../services/orders';
 import { recordCapsulePurchase } from '../services/capsules';
 import { downloadCapsuleBundle } from '../services/downloads';
 import { recordCollectorEmail } from '../services/collectors';
-import { calculateDiscountAmount, defaultPromoCodes, validatePromoCode } from '../data/promoCodes';
+import { calculateDiscountAmount, defaultPromoCodes, validatePromoCode, normalizeCode } from '../data/promoCodes';
 import { fetchPromos } from '../services/promos';
 
 const TAX_RATE = 0.0825;
@@ -68,13 +68,14 @@ const Checkout = () => {
 
   const handleApplyPromo = (event) => {
     event.preventDefault();
-    if (!promoInput.trim()) {
+    const normalizedInput = normalizeCode(promoInput);
+    if (!normalizedInput) {
       setPromoFeedback({ type: 'error', message: 'Enter a promo code before applying.' });
       return;
     }
     const subtotal = cartSummary.subtotal || 0;
     const preDiscountTotal = subtotal + subtotal * TAX_RATE;
-    const result = validatePromoCode(promoInput, subtotal, promoPool, {
+    const result = validatePromoCode(normalizedInput, subtotal, promoPool, {
       orderTotal: preDiscountTotal,
     });
     if (!result.valid) {
@@ -90,7 +91,8 @@ const Checkout = () => {
       setPromoFeedback({ type: 'error', message });
       return;
     }
-    setAppliedPromo(result.promo);
+  setAppliedPromo(result.promo);
+  setPromoInput(normalizedInput);
     setPromoFeedback({
       type: 'success',
       message: `${result.promo.label} applied — saved $${result.discount.toFixed(2)}!`,
@@ -238,8 +240,14 @@ const Checkout = () => {
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  enterKeyHint="done"
                   value={promoInput}
-                  onChange={(event) => setPromoInput(event.target.value.toUpperCase())}
+                  onChange={(event) => setPromoInput(event.target.value)}
                   placeholder="FRAMEVIST2025"
                   className="flex-1 rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm font-mono uppercase tracking-wider outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                 />

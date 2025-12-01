@@ -19,8 +19,9 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
     match /capsules/{docId} {
-      allow read: if true; // or lock down as needed
-      allow write: if isSignedIn();
+      allow read: if true; // storefront needs to read capsule catalog
+      allow create, delete: if isSignedIn();
+      allow update: if isSignedIn() || isPublicStatsIncrement();
     }
 
     match /orders/{docId} {
@@ -40,8 +41,8 @@ service cloud.firestore {
     }
 
     match /promoCodes/{docId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if true;
+      allow write: if isAdminUser();
     }
 
     match /adminSettings/{docId} {
@@ -53,4 +54,17 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
   }
+}
+
+function isPublicStatsIncrement() {
+  return request.auth == null &&
+    request.resource.data.diff(resource.data).changedKeys().hasOnly(['stats']) &&
+    statsOnlyIncrease('views') &&
+    statsOnlyIncrease('addedToCart') &&
+    statsOnlyIncrease('purchases');
+}
+
+function statsOnlyIncrease(field) {
+  return (!resource.data.stats[field] && !request.resource.data.stats[field]) ||
+    (request.resource.data.stats[field] >= resource.data.stats[field]);
 }
