@@ -23,6 +23,8 @@ const Checkout = () => {
   const [promoPool, setPromoPool] = useState(defaultPromoCodes);
   const [promoSyncing, setPromoSyncing] = useState(false);
   const [expiryDate, setExpiryDate] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cvc, setCvc] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -73,6 +75,16 @@ const Checkout = () => {
       value = value.slice(0, 2) + '/' + value.slice(2, 4);
     }
     setExpiryDate(value);
+  };
+
+  const handleCardNumberChange = (event) => {
+    const value = event.target.value.replace(/\D/g, '').slice(0, 16);
+    setCardNumber(value);
+  };
+
+  const handleCvcChange = (event) => {
+    const value = event.target.value.replace(/\D/g, '').slice(0, 3);
+    setCvc(value);
   };
 
   const handleApplyPromo = (event) => {
@@ -354,10 +366,12 @@ const Checkout = () => {
                     Card Number
                   </label>
                   <input
+                    type="text"
                     inputMode="numeric"
-                    pattern="[0-9 ]{12,19}"
-                    className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 font-mono text-ink outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+                    value={cardNumber}
+                    onChange={handleCardNumberChange}
                     placeholder="4242 4242 4242 4242"
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 font-mono text-ink outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
                     required
                   />
                 </div>
@@ -383,9 +397,10 @@ const Checkout = () => {
                       CVC
                     </label>
                     <input
+                      type="text"
                       inputMode="numeric"
-                      maxLength={3}
-                      pattern="[0-9]{3}"
+                      value={cvc}
+                      onChange={handleCvcChange}
                       placeholder="123"
                       className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 font-mono text-ink outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
                       required
