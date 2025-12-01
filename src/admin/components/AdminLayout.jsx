@@ -34,8 +34,8 @@ const AdminLayout = () => {
   const linkClasses = ({ isActive }) =>
     `flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold uppercase tracking-[0.1em] transition-all duration-150 ${
       isActive
-        ? 'bg-indigo-600 text-white shadow scale-[1.04] border-b-2 border-indigo-400'
-        : 'text-slate-600 hover:bg-slate-100 hover:text-ink'
+        ? 'bg-slate-900 text-white shadow scale-[1.04] border-b-2 border-slate-700'
+        : 'text-slate-700 hover:bg-slate-100 hover:text-black'
     }`;
 
   // Mobile sidebar toggle
