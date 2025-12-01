@@ -26,7 +26,7 @@ const ModelInput = ({
 
   const applyValue = (nextValue) => {
     onChange?.(nextValue.trim());
-    setFocused(false);
+    // Don't set focused to false to allow dropdown to reappear when typing continues
     setHighlightedIndex(-1);
   };
 

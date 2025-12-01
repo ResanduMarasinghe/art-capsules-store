@@ -79,7 +79,7 @@ const TagInput = ({ label = 'Tags', values = [], onChange, suggestions = [] }) =
 
   const handleSuggestionSelect = (tag) => {
     addTag(tag);
-    setFocused(false);
+    // Keep focused state true so dropdown can reappear when typing continues
   };
 
   const handleBlur = () => {
