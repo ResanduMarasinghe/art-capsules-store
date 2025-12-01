@@ -26,51 +26,49 @@ const AdminSignIn = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pearl via-white to-pearl px-6 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md space-y-6 rounded-3xl border border-slate-100 bg-white/80 p-8 shadow-2xl backdrop-blur"
+        className="w-full max-w-sm space-y-7 rounded-2xl border border-slate-200 bg-white p-8 shadow-xl"
       >
-        <div>
-          <p className="text-xs uppercase tracking-[0.4em] text-mist">Frame Vist</p>
-          <h1 className="mt-2 font-display text-2xl text-ink">Admin Access</h1>
-          <p className="mt-3 text-sm text-slate-500">
-            Sign in with your curated admin credentials to manage capsules.
-          </p>
+        <div className="mb-2 text-center">
+          <h1 className="font-display text-2xl font-bold text-ink mb-1">Frame Vist Admin</h1>
+          <p className="text-xs uppercase tracking-[0.3em] text-mist">Sign in to continue</p>
         </div>
-        <label className="block space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Email</span>
+        <label className="block space-y-1">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Email</span>
           <input
             type="email"
             name="email"
             required
             value={formState.email}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-ink outline-none transition focus:border-ink"
+            className="w-full rounded-lg border border-slate-300 px-4 py-3 text-base text-ink outline-none transition focus:border-indigo-500"
+            autoFocus
           />
         </label>
-        <label className="block space-y-2">
-          <span className="text-xs uppercase tracking-[0.35em] text-mist">Password</span>
+        <label className="block space-y-1">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Password</span>
           <input
             type="password"
             name="password"
             required
             value={formState.password}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-ink outline-none transition focus:border-ink"
+            className="w-full rounded-lg border border-slate-300 px-4 py-3 text-base text-ink outline-none transition focus:border-indigo-500"
           />
         </label>
         {(localError || error) && (
-          <p className="text-sm text-rose-500">
+          <p className="text-sm text-rose-500 text-center">
             {localError || error}
           </p>
         )}
         <button
           type="submit"
-          className="w-full rounded-full bg-ink px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-ink/90 disabled:opacity-60"
+          className="w-full rounded-lg bg-slate-800 px-6 py-3 text-base font-semibold uppercase tracking-[0.2em] text-white shadow hover:bg-slate-900 transition disabled:opacity-60"
           disabled={status === 'loading'}
         >
-          {status === 'loading' ? 'Signing in…' : 'Enter Admin'}
+          {status === 'loading' ? 'Signing in…' : 'Sign In'}
         </button>
       </form>
     </div>
