@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import OrdersModal from '../components/OrdersModal';
+import { FaDollarSign, FaReceipt, FaCube } from 'react-icons/fa6';
+// import { fetchOrders } from '../../services/orders';
+// import { fetchCollectorEmails } from '../../services/collectors';
+
+// import { useEffect, useMemo, useState } from 'react';
 import { fetchOrders } from '../../services/orders';
 import { fetchCollectorEmails } from '../../services/collectors';
 
@@ -42,6 +48,7 @@ const AdminDashboard = () => {
   }, [orders]);
 
   const recentOrders = orders.slice(0, 5);
+  const [ordersModalOpen, setOrdersModalOpen] = useState(false);
   const latestCollectors = collectorEmails.slice(0, 8);
 
   const formatCurrency = (value) => `$${value.toFixed(2)}`;
@@ -50,41 +57,57 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {/* Overview Section */}
       <div className="space-y-2 sm:space-y-3">
         <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist sm:text-xs">Overview</p>
         <h1 className="font-display text-2xl text-ink sm:text-3xl">Frame Vist Operations</h1>
-        <p className="max-w-2xl text-xs leading-relaxed text-slate-500 sm:text-sm">
-          Monitor capsules, review drop performance, and keep the collection curated. Use the sidebar to
-          add new capsules, adjust pricing, or review analytics.
-        </p>
       </div>
 
       {error && <p className="text-sm text-rose-500">{error}</p>}
 
+      {/* Stats Cards */}
       <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6">
-          <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Total Revenue</p>
+        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <FaDollarSign className="w-5 h-5 text-emerald-500" />
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Total Revenue</p>
+          </div>
           <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{formatCurrency(stats.revenue || 0)}</p>
           <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">aura capsules sold</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6">
-          <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Orders</p>
+        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <FaReceipt className="w-5 h-5 text-indigo-500" />
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Orders</p>
+          </div>
           <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{stats.orders}</p>
           <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">lifetime frames curated</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6">
-          <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Pieces sold</p>
+        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <FaCube className="w-5 h-5 text-pink-500" />
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Pieces sold</p>
+          </div>
           <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{stats.pieces}</p>
           <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">individual capsules delivered</p>
         </div>
       </div>
 
+      {/* Recent Orders Section */}
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[0.65rem] uppercase tracking-[0.35em] text-mist sm:text-xs">Recent orders</p>
             <h2 className="font-display text-xl text-ink sm:text-2xl">Collector activity</h2>
           </div>
+          <button
+            type="button"
+            className="rounded-full bg-ink px-4 py-2 text-xs font-semibold text-white shadow hover:bg-black transition disabled:opacity-50"
+            onClick={() => setOrdersModalOpen(true)}
+            disabled={orders.length === 0}
+          >
+            View all orders
+          </button>
         </div>
         {/* Mobile Card Layout */}
         <div className="space-y-3 md:hidden">
@@ -167,6 +190,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Collector Emails Section */}
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -241,8 +265,10 @@ const AdminDashboard = () => {
           </table>
         </div>
       </div>
-    </div>
-  );
+    {/* Orders Modal Overlay */}
+    <OrdersModal open={ordersModalOpen} orders={orders} onClose={() => setOrdersModalOpen(false)} />
+  </div>
+);
 };
 
 export default AdminDashboard;
