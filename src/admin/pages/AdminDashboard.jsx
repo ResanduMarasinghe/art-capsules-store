@@ -66,30 +66,38 @@ const AdminDashboard = () => {
       {error && <p className="text-sm text-rose-500">{error}</p>}
 
       {/* Stats Cards */}
-      <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <FaDollarSign className="w-5 h-5 text-emerald-500" />
-            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Total Revenue</p>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-start justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 transition-transform group-hover:scale-110">
+              <FaDollarSign className="h-6 w-6" />
+            </div>
           </div>
-          <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{formatCurrency(stats.revenue || 0)}</p>
-          <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">aura capsules sold</p>
+          <p className="mt-4 text-sm font-medium text-slate-500">Total Revenue</p>
+          <p className="mt-1 text-3xl font-bold text-slate-900">{formatCurrency(stats.revenue || 0)}</p>
+          <p className="mt-2 text-sm text-slate-400">aura capsules sold</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <FaReceipt className="w-5 h-5 text-indigo-500" />
-            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Orders</p>
+
+        <div className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-start justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-transform group-hover:scale-110">
+              <FaReceipt className="h-6 w-6" />
+            </div>
           </div>
-          <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{stats.orders}</p>
-          <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">lifetime frames curated</p>
+          <p className="mt-4 text-sm font-medium text-slate-500">Orders</p>
+          <p className="mt-1 text-3xl font-bold text-slate-900">{stats.orders}</p>
+          <p className="mt-2 text-sm text-slate-400">lifetime frames curated</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-inner sm:rounded-3xl sm:p-6 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <FaCube className="w-5 h-5 text-pink-500" />
-            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400 sm:text-xs">Pieces sold</p>
+
+        <div className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-start justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100 text-pink-600 transition-transform group-hover:scale-110">
+              <FaCube className="h-6 w-6" />
+            </div>
           </div>
-          <p className="mt-3 font-display text-3xl text-ink sm:mt-4 sm:text-4xl">{stats.pieces}</p>
-          <p className="mt-1 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:mt-2 sm:text-xs">individual capsules delivered</p>
+          <p className="mt-4 text-sm font-medium text-slate-500">Pieces Sold</p>
+          <p className="mt-1 text-3xl font-bold text-slate-900">{stats.pieces}</p>
+          <p className="mt-2 text-sm text-slate-400">individual capsules delivered</p>
         </div>
       </div>
 
@@ -102,7 +110,7 @@ const AdminDashboard = () => {
           </div>
           <button
             type="button"
-            className="rounded-full bg-ink px-4 py-2 text-xs font-semibold text-white shadow hover:bg-black transition disabled:opacity-50"
+            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:bg-black disabled:opacity-50"
             onClick={() => setOrdersModalOpen(true)}
             disabled={orders.length === 0}
           >
