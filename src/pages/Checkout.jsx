@@ -22,6 +22,7 @@ const Checkout = () => {
   const [promoFeedback, setPromoFeedback] = useState(null);
   const [promoPool, setPromoPool] = useState(defaultPromoCodes);
   const [promoSyncing, setPromoSyncing] = useState(false);
+  const [expiryDate, setExpiryDate] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -64,6 +65,14 @@ const Checkout = () => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleExpiryChange = (event) => {
+    let value = event.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value.length >= 2) {
+      value = value.slice(0, 2) + '/' + value.slice(2, 4);
+    }
+    setExpiryDate(value);
   };
 
   const handleApplyPromo = (event) => {
@@ -359,7 +368,12 @@ const Checkout = () => {
                       Expiry Date
                     </label>
                     <input
-                      placeholder="MM / YY"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={5}
+                      placeholder="MM/YY"
+                      value={expiryDate}
+                      onChange={handleExpiryChange}
                       className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 font-mono text-ink outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
                       required
                     />
